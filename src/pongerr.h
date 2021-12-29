@@ -13,7 +13,6 @@ typedef enum PongErr
 	PongErr_dwFactory,
 	PongErr_dxRT,
 
-
 	PongErr_num_errs
 } PongErr_e;
 

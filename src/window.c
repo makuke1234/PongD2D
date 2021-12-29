@@ -50,7 +50,7 @@ bool PongWnd_create(PongWnd_t * pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmd
 	};
 
 	// init d2d factory
-	HRESULT hr = dxD2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pong->dx.factory);
+	HRESULT hr = dxD2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, (void **)&pong->dx.factory);
 	if (FAILED(hr))
 	{
 		g_pongLastError = PongErr_dxFactory;
@@ -117,7 +117,7 @@ bool PongWnd_create(PongWnd_t * pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmd
 		),
 		dxD2D1HwndRenderTargetProperties(
 			pong->hwnd,
-			(D2D1_SIZE_U){ .width = pong->size.cx, .height = pong->size.cy },
+			(D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy },
 			D2D1_PRESENT_OPTIONS_NONE
 		),
 		&pong->dx.hwndRT
@@ -187,8 +187,10 @@ void PongWnd_free(PongWnd_t * pong)
 		free(pong->wndTitle);
 		pong->wndTitle = NULL;
 	}
+	PongDx_destroyAssets(&pong->dx);
+	dxSafeRelease((IUnknown **)&pong->dx.hwndRT);
 	dxSafeRelease(&pong->dx.wFactory);
-	dxSafeRelease(&pong->dx.factory);
+	dxSafeRelease((IUnknown **)&pong->dx.factory);
 }
 
 LRESULT CALLBACK PongWnd_winProcHub(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -253,12 +255,13 @@ void PongWnd_onRender(PongWnd_t * pong)
 
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(pong->hwnd, &ps);
+	consciousUnused(hdc);
 
-	dxRTBeginDraw(pong->dx.hwndRT);
-	dxRTSetTransform(pong->dx.hwndRT, dxD2D1Matrix3x2FIdentity());
-	dxRTClear(pong->dx.hwndRT, (D2D1_COLOR_F){ .r = 0.5f, .g = 1.0f, .b = 0.0f, .a = 1.0f });
+	dxRTBeginDraw((ID2D1RenderTarget *)pong->dx.hwndRT);
+	dxRTSetTransform((ID2D1RenderTarget *)pong->dx.hwndRT, dxD2D1Matrix3x2FIdentity());
+	dxRTClear((ID2D1RenderTarget *)pong->dx.hwndRT, (D2D1_COLOR_F){ .r = 0.5f, .g = 1.0f, .b = 0.0f, .a = 1.0f });
 
-	if (dxRTEndDraw(pong->dx.hwndRT) == D2DERR_RECREATE_TARGET)
+	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.hwndRT) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{
 		PongDx_destroyAssets(&pong->dx);
 	}
@@ -270,7 +273,7 @@ void PongWnd_onSize(PongWnd_t * pong, LPARAM lp)
 	pong->size.cx = LOWORD(lp);
 	pong->size.cy = HIWORD(lp);
 
-	dxHwndRTResize(pong->dx.hwndRT, (D2D1_SIZE_U){ .width = pong->size.cx, .height = pong->size.cy });
+	dxHwndRTResize(pong->dx.hwndRT, (D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy });
 }
 void PongWnd_onSizing(PongWnd_t * pong, WPARAM wp, LPARAM lp)
 {
@@ -321,7 +324,7 @@ void PongWnd_onSizing(PongWnd_t * pong, WPARAM wp, LPARAM lp)
 }
 void PongWnd_onDpiChanged(PongWnd_t * pong, LPARAM lp)
 {
-	dxRTGetDpi(pong->dx.hwndRT, &pong->dpiX, &pong->dpiY);
+	dxRTGetDpi((ID2D1RenderTarget *)pong->dx.hwndRT, &pong->dpiX, &pong->dpiY);
 
 	RECT * newr = (RECT *)lp;
 	SetWindowPos(
