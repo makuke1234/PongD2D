@@ -23,8 +23,8 @@ extern const wchar_t * c_errorIds[PongErr_num_errs];
 PongErr_e PongErr_norm(PongErr_e errId);
 const wchar_t * PongErr_msg(PongErr_e errId);
 
-void pongErr(PongWnd_t * pong, PongErr_e errId);
-void pongLastErr(PongWnd_t * pong);
+void pongErr(const PongWnd_t * restrict pong, PongErr_e errId);
+void pongLastErr(const PongWnd_t * restrict pong);
 
 
 #endif

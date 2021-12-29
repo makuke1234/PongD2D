@@ -6,36 +6,64 @@
 
 bool g_pongClassRegistered = false;
 
-bool PongDx_createAssets(DxBoilerPlate_t * plate)
+bool PongWnd_createAssets(PongWnd_t * restrict pong)
 {
-	if (plate == NULL)
+	if (pong == NULL)
 	{
 		return false;
 	}
-	else if (plate->assetsCreated == true)
+	else if (pong->dx.assetsCreated == true)
 	{
 		return true;
 	}
 
 	// Create assets here
+	HRESULT hr = dxFactoryCreateHwndRenderTarget(
+		pong->dx.factory,
+		dxD2D1RenderTargetProperties(
+			D2D1_RENDER_TARGET_TYPE_DEFAULT,
+			dxD2D1PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_UNKNOWN),
+			0.0F,
+			0.0F,
+			D2D1_RENDER_TARGET_USAGE_NONE,
+			D2D1_FEATURE_LEVEL_DEFAULT
+		),
+		dxD2D1HwndRenderTargetProperties(
+			pong->hwnd,
+			(D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy },
+			D2D1_PRESENT_OPTIONS_NONE
+		),
+		&pong->dx.hwndRT
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxRT;
+		return false;
+	}
+
+	// Create 1 rectangle to represent the bouncing surface
 
 
-	plate->assetsCreated = true;
+	// Create 1 circle to represent the ball
+
+
+	// return successfully
+	pong->dx.assetsCreated = true;
 	return true;
 }
-void PongDx_destroyAssets(DxBoilerPlate_t * plate)
+void PongWnd_destroyAssets(PongWnd_t * restrict pong)
 {
-	if (plate == NULL || plate->assetsCreated == false)
+	if (pong == NULL || pong->dx.assetsCreated == false)
 	{
 		return;
 	}
-	plate->assetsCreated = false;
+	pong->dx.assetsCreated = false;
 
 	// Destroy assets here
-
+	dxSafeRelease((IUnknown **)&pong->dx.hwndRT);
 }
 
-bool PongWnd_create(PongWnd_t * pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmdShow)
+bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmdShow)
 {
 	if (pong == NULL)
 	{
@@ -89,7 +117,7 @@ bool PongWnd_create(PongWnd_t * pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmd
 		0,
 		PONG_CLASSNAME,
 		PONG_APPNAME,
-		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX,
+		WS_OVERLAPPEDWINDOW ^ (WS_MAXIMIZEBOX | WS_SIZEBOX),
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -105,35 +133,29 @@ bool PongWnd_create(PongWnd_t * pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmd
 		return false;
 	}
 
-	hr = dxFactoryCreateHwndRenderTarget(
-		pong->dx.factory,
-		dxD2D1RenderTargetProperties(
-			D2D1_RENDER_TARGET_TYPE_DEFAULT,
-			dxD2D1PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_UNKNOWN),
-			0.0F,
-			0.0F,
-			D2D1_RENDER_TARGET_USAGE_NONE,
-			D2D1_FEATURE_LEVEL_DEFAULT
-		),
-		dxD2D1HwndRenderTargetProperties(
-			pong->hwnd,
-			(D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy },
-			D2D1_PRESENT_OPTIONS_NONE
-		),
-		&pong->dx.hwndRT
-	);
-	if (FAILED(hr))
+	PongWnd_calcDpiSpecific(pong);
+
+	if (PongWnd_createAssets(pong) == false)
 	{
-		g_pongLastError = PongErr_dxRT;
 		return false;
 	}
+
+	SetWindowPos(
+		pong->hwnd,
+		NULL,
+		0,
+		0,
+		pong->minSize.cx,
+		pong->minSize.cy,
+		SWP_NOZORDER | SWP_NOMOVE
+	);
 
 	ShowWindow(pong->hwnd, nCmdShow);
 	UpdateWindow(pong->hwnd);
 
 	return true;
 }
-bool PongWnd_setTitle(PongWnd_t * pong, LPCWSTR title)
+bool PongWnd_setTitle(PongWnd_t * restrict pong, LPCWSTR title)
 {
 	if (pong == NULL || title == NULL || pong->hwnd == NULL)
 	{
@@ -152,7 +174,7 @@ bool PongWnd_setTitle(PongWnd_t * pong, LPCWSTR title)
 
 	return SetWindowTextW(pong->hwnd, pong->wndTitle) != 0;
 }
-const wchar_t * PongWnd_getTitle(PongWnd_t * pong)
+const wchar_t * PongWnd_getTitle(const PongWnd_t * restrict pong)
 {
 	if (pong == NULL || pong->wndTitle == NULL)
 	{
@@ -163,7 +185,7 @@ const wchar_t * PongWnd_getTitle(PongWnd_t * pong)
 		return pong->wndTitle;
 	}
 }
-int PongWnd_msgLoop(PongWnd_t * pong)
+int PongWnd_msgLoop(const PongWnd_t * pong)
 {
 	MSG msg;
 	BOOL br;
@@ -180,17 +202,46 @@ int PongWnd_msgLoop(PongWnd_t * pong)
 
 	return (int)msg.wParam;
 }
-void PongWnd_free(PongWnd_t * pong)
+void PongWnd_free(PongWnd_t * restrict pong)
 {
 	if (pong->wndTitle != NULL)
 	{
 		free(pong->wndTitle);
 		pong->wndTitle = NULL;
 	}
-	PongDx_destroyAssets(&pong->dx);
-	dxSafeRelease((IUnknown **)&pong->dx.hwndRT);
+	PongWnd_destroyAssets(pong);
 	dxSafeRelease(&pong->dx.wFactory);
 	dxSafeRelease((IUnknown **)&pong->dx.factory);
+}
+
+FLOAT PongWnd_dipx(const PongWnd_t * restrict pong, FLOAT x)
+{
+	return x * pong->dpiX / 96.0F;
+}
+FLOAT PongWnd_dipy(const PongWnd_t * restrict pong, FLOAT y)
+{
+	return y * pong->dpiY / 96.0F;
+}
+FLOAT PongWnd_dpix(const PongWnd_t * restrict pong, FLOAT x)
+{
+	return x * 96.0F / pong->dpiX;
+}
+FLOAT PongWnd_dpiy(const PongWnd_t * restrict pong, FLOAT y)
+{
+	return y * 96.0F / pong->dpiY;
+}
+
+
+void PongWnd_calcDpiSpecific(PongWnd_t * restrict pong)
+{
+	RECT r, cr;
+	GetWindowRect(pong->hwnd, &r);
+	GetClientRect(pong->hwnd, &cr);
+	pong->border.cx = (r.right  - r.left) - (cr.right  - cr.left);
+	pong->border.cy = (r.bottom - r.top)  - (cr.bottom - cr.top);
+
+	pong->minSize.cx = (LONG)PongWnd_dipx(pong, PONG_MINW) + pong->border.cx + 1;
+	pong->minSize.cy = (LONG)PongWnd_dipy(pong, PONG_MINH) + pong->border.cy + 1;
 }
 
 LRESULT CALLBACK PongWnd_winProcHub(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -249,9 +300,12 @@ LRESULT PongWnd_winProc(PongWnd_t * pong, HWND hwnd, UINT msg, WPARAM wp, LPARAM
 	return 0;
 }
 
-void PongWnd_onRender(PongWnd_t * pong)
+void PongWnd_onRender(PongWnd_t * restrict pong)
 {
-	PongDx_createAssets(&pong->dx);
+	if (PongWnd_createAssets(pong) == false)
+	{
+		return;
+	}
 
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(pong->hwnd, &ps);
@@ -259,23 +313,28 @@ void PongWnd_onRender(PongWnd_t * pong)
 
 	dxRTBeginDraw((ID2D1RenderTarget *)pong->dx.hwndRT);
 	dxRTSetTransform((ID2D1RenderTarget *)pong->dx.hwndRT, dxD2D1Matrix3x2FIdentity());
-	dxRTClear((ID2D1RenderTarget *)pong->dx.hwndRT, (D2D1_COLOR_F){ .r = 0.5f, .g = 1.0f, .b = 0.0f, .a = 1.0f });
+	// Draw black background
+	dxRTClear((ID2D1RenderTarget *)pong->dx.hwndRT, (D2D1_COLOR_F){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f });
 
 	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.hwndRT) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{
-		PongDx_destroyAssets(&pong->dx);
+		PongWnd_destroyAssets(pong);
 	}
 
 	EndPaint(pong->hwnd, &ps);
 }
-void PongWnd_onSize(PongWnd_t * pong, LPARAM lp)
+void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp)
 {
+	if (pong->dx.hwndRT == NULL)
+	{
+		return;
+	}
 	pong->size.cx = LOWORD(lp);
 	pong->size.cy = HIWORD(lp);
 
 	dxHwndRTResize(pong->dx.hwndRT, (D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy });
 }
-void PongWnd_onSizing(PongWnd_t * pong, WPARAM wp, LPARAM lp)
+void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 {
 	// Make sure that window is not resizable
 	RECT * r = (RECT *)lp;
@@ -322,8 +381,13 @@ void PongWnd_onSizing(PongWnd_t * pong, WPARAM wp, LPARAM lp)
 		break;
 	}
 }
-void PongWnd_onDpiChanged(PongWnd_t * pong, LPARAM lp)
+void PongWnd_onDpiChanged(PongWnd_t * restrict pong, LPARAM lp)
 {
+	if (pong->dx.hwndRT == NULL)
+	{
+		return;
+	}
+
 	dxRTGetDpi((ID2D1RenderTarget *)pong->dx.hwndRT, &pong->dpiX, &pong->dpiY);
 
 	RECT * newr = (RECT *)lp;
@@ -334,4 +398,6 @@ void PongWnd_onDpiChanged(PongWnd_t * pong, LPARAM lp)
 		newr->right - newr->left, newr->bottom - newr->top,
 		SWP_NOZORDER
 	);
+
+	PongWnd_calcDpiSpecific(pong);
 }

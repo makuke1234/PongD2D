@@ -28,7 +28,7 @@ const wchar_t * PongErr_msg(PongErr_e errId)
 	return c_errorIds[PongErr_norm(errId)];
 }
 
-void pongErr(PongWnd_t * pong, PongErr_e errId)
+void pongErr(const PongWnd_t * restrict pong, PongErr_e errId)
 {
 	MessageBoxW(
 		pong->hwnd,
@@ -37,7 +37,7 @@ void pongErr(PongWnd_t * pong, PongErr_e errId)
 		MB_ICONERROR | MB_OK
 	);
 }
-void pongLastErr(PongWnd_t * pong)
+void pongLastErr(const PongWnd_t * restrict pong)
 {
 	pongErr(pong, g_pongLastError);
 }
