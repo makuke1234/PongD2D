@@ -1,7 +1,12 @@
 #include "pongerr.h"
 
 const wchar_t * c_errorIds[PongErr_num_errs] = {
-	L"Unknown error occurred!"
+	L"Unknown error occurred!",
+	L"Error registering window class!",
+	L"Error creating window!",
+	L"Error creating D2D factory!",
+	L"Error creating DWrite factory!",
+	L"Error creating D2D render target!"
 };
 
 PongErr_e g_pongLastError = PongErr_unknown;
