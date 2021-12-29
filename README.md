@@ -2,8 +2,9 @@
 
 ![Release version](https://img.shields.io/badge/release-v0.0.1-red.svg)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
+![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
-A pong fork written in C utilising Direct2D API (similar to my other project [SnakeD2D](https://github.com/makuke1234/SnakeD2D)).
+A pong fork written in C utilising Direct2D API (similar to my other project [SnakeD2D](https://github.com/makuke1234/SnakeD2D)). Wrappers for Direct2D are written in C++.
 
 
 # Obtaining
