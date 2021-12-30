@@ -2,17 +2,47 @@
 #include "resource.h"
 #include "pongerr.h"
 
+#include <time.h>
+
 DWORD WINAPI PongLogic_thread(LPVOID param)
 {
 	PongLogic_t * logic = param;
 
 	while (logic->killThreadFlag == false)
 	{
+		while (!logic->scoring.notPaused)
+		{
+			Sleep(20);
+			if (logic->killThreadFlag)
+			{
+				goto PongLogic_thread_finish;
+			}
+		}
+
+		clock_t start = clock();
 		Sleep(20);
+		float delta = (float)(clock() - start) / (float)CLOCKS_PER_SEC;
+
+		logic->scoring.time += delta;
+
+		switch (logic->scoring.mode)
+		{
+		case GameMode_normal:
+		{
+			break;
+		}
+		case GameMode_gameOver:
+		{
+
+			break;
+		}
+		}
 
 		// Update screen
 		InvalidateRect(logic->pong->hwnd, NULL, FALSE);
 	}
+
+PongLogic_thread_finish: ;
 
 	return 0;
 }
@@ -158,40 +188,51 @@ void PongLogic_freeAssets(PongLogic_t * restrict logic)
 	dxSafeRelease((IUnknown **)&logic->pRightWallGeo);
 }
 
-void PongLogic_calcAbsLeftPad(PongLogic_t * logic)
+void PongLogic_calcAbsLeftPad(PongLogic_t * restrict logic)
 {
 	if (logic == NULL)
 	{
 		return;
 	}
-	logic->absLeftPad = (D2D1_RECT_F){
+	logic->scoring.absLeftPad = (D2D1_RECT_F){
 		.left   = 0.0f,
-		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->relLeftPad,
+		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->scoring.relLeftPad,
 		.right  = PONG_WALL_X,
-		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->relLeftPad,
+		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->scoring.relLeftPad,
 	};
 }
-void PongLogic_calcAbsRightPad(PongLogic_t * logic)
+void PongLogic_calcAbsRightPad(PongLogic_t * restrict logic)
 {
 	if (logic == NULL)
 	{
 		return;
 	}
-	logic->absRightPad = (D2D1_RECT_F){
+	logic->scoring.absRightPad = (D2D1_RECT_F){
 		.left   = PONG_MINW - PONG_WALL_X,
-		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->relRightPad,
+		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->scoring.relRightPad,
 		.right  = PONG_MINW,
-		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->relRightPad
+		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->scoring.relRightPad
 	};
 }
-void PongLogic_calcAbsBall(PongLogic_t * logic)
+void PongLogic_calcAbsBall(PongLogic_t * restrict logic)
 {
 	if (logic == NULL)
 	{
 		return;
 	}
-	logic->absBall = (D2D1_POINT_2F){
+	logic->scoring.absBall = (D2D1_POINT_2F){
 		.x = PONG_MINW / 2.0f,
 		.y = PONG_MINH / 2.0f
 	};
+}
+
+void PongLogic_reset(PongLogic_t * restrict logic)
+{
+	if (logic == NULL)
+	{
+		return;
+	}
+
+	// Reset scoring
+	logic->scoring = (Scoring_t){ 0 };
 }

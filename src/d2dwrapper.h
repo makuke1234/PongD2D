@@ -54,7 +54,7 @@ D2D1_PIXEL_FORMAT dxD2D1PixelFormat(
 D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FIdentity();
 
 void dxFactoryGetDesktopDpi(ID2D1Factory * This, FLOAT * dpiX, FLOAT * dpiY);
-void dxRTGetDpi(ID2D1RenderTarget * This, FLOAT * dpiX, FLOAT * dpiY);
+void dxRTGetDpi(const ID2D1RenderTarget * This, FLOAT * dpiX, FLOAT * dpiY);
 void dxRTBeginDraw(ID2D1RenderTarget * This);
 void dxRTSetTransform(ID2D1RenderTarget * This, D2D1_MATRIX_3X2_F identity);
 void dxRTClear(ID2D1RenderTarget * This, D2D1_COLOR_F color);
@@ -134,6 +134,13 @@ HRESULT dxHwndRTResize(ID2D1HwndRenderTarget * This, D2D1_SIZE_U sz);
 void dxRadialGradBrushSetCenter(
 	ID2D1RadialGradientBrush * This,
 	D2D1_POINT_2F center
+);
+
+HRESULT dxGeoCompareWithGeometry(
+	const ID2D1Geometry * This,
+	ID2D1Geometry * inputGeo,
+	D2D1_MATRIX_3X2_F inputGeoTransform,
+	D2D1_GEOMETRY_RELATION * relation
 );
 
 #ifdef __cplusplus

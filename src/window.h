@@ -103,5 +103,7 @@ void PongWnd_onRender(PongWnd_t * restrict pong);
 void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp);
 void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp);
 void PongWnd_onDpiChanged(PongWnd_t * restrict pong, LPARAM lp);
+void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp);
+void PongWnd_onKeyRelease(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp);
 
 #endif

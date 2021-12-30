@@ -78,7 +78,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 	hr = dxRTCreateRadialGradientBrush(
 		(ID2D1RenderTarget *)pong->dx.pRT,
 		dxD2D1RadialGradientBrushProperties(
-			pong->logic.absBall,
+			pong->logic.scoring.absBall,
 			(D2D1_POINT_2F){ .x = 5.0f, .y = -2.0f },
 			PONG_BALL_X, PONG_BALL_Y
 		),
@@ -337,6 +337,12 @@ LRESULT PongWnd_winProc(PongWnd_t * pong, HWND hwnd, UINT msg, WPARAM wp, LPARAM
 	case WM_PAINT:
 		PongWnd_onRender(pong);
 		break;
+	case WM_KEYDOWN:
+		PongWnd_onKeyPress(pong, wp, lp);
+		break;
+	case WM_KEYUP:
+		PongWnd_onKeyRelease(pong, wp, lp);
+		break;
 	case WM_SIZING:
 		PongWnd_onSizing(pong, wp, lp);
 		break;
@@ -397,12 +403,12 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	// Draw walls
 	dxRTFillRectangle(
 		(ID2D1RenderTarget *)pong->dx.pRT,
-		pong->logic.absLeftPad,
+		pong->logic.scoring.absLeftPad,
 		(ID2D1Brush *)pong->dx.pWhiteBrush
 	);
 	dxRTFillRectangle(
 		(ID2D1RenderTarget *)pong->dx.pRT,
-		pong->logic.absRightPad,
+		pong->logic.scoring.absRightPad,
 		(ID2D1Brush *)pong->dx.pWhiteBrush
 	);
 
@@ -410,8 +416,8 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	dxRadialGradBrushSetCenter(
 		pong->dx.pBallBrush,
 		(D2D1_POINT_2F){
-			.x = pong->logic.absBall.x + 5.0f,
-			.y = pong->logic.absBall.y - 2.0f 
+			.x = pong->logic.scoring.absBall.x + 5.0f,
+			.y = pong->logic.scoring.absBall.y - 2.0f 
 		}
 	);
 
@@ -419,7 +425,7 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	dxRTFillEllipse(
 		(ID2D1RenderTarget *)pong->dx.pRT,
 		(D2D1_ELLIPSE){
-			.point   = pong->logic.absBall,
+			.point   = pong->logic.scoring.absBall,
 			.radiusX = PONG_BALL_X,
 			.radiusY = PONG_BALL_Y
 		},
@@ -514,4 +520,12 @@ void PongWnd_onDpiChanged(PongWnd_t * restrict pong, LPARAM lp)
 	);
 
 	PongWnd_calcDpiSpecific(pong);
+}
+void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
+{
+
+}
+void PongWnd_onKeyRelease(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
+{
+	
 }

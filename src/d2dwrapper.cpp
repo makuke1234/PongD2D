@@ -93,7 +93,7 @@ void dxFactoryGetDesktopDpi(ID2D1Factory * This, FLOAT * dpiX, FLOAT * dpiY)
 {
 	This->GetDesktopDpi(dpiX, dpiY);
 }
-void dxRTGetDpi(ID2D1RenderTarget * This, FLOAT * dpiX, FLOAT * dpiY)
+void dxRTGetDpi(const ID2D1RenderTarget * This, FLOAT * dpiX, FLOAT * dpiY)
 {
 	This->GetDpi(dpiX, dpiY);
 }
@@ -240,5 +240,16 @@ void dxRadialGradBrushSetCenter(
 {
 	This->SetCenter(center);
 }
+
+HRESULT dxGeoCompareWithGeometry(
+	const ID2D1Geometry * This,
+	ID2D1Geometry * inputGeo,
+	D2D1_MATRIX_3X2_F inputGeoTransform,
+	D2D1_GEOMETRY_RELATION * relation
+)
+{
+	return This->CompareWithGeometry(inputGeo, inputGeoTransform, relation);
+}
+
 
 }
