@@ -107,14 +107,34 @@ void dxRTFillGeometry(
 	ID2D1Brush * brush,
 	ID2D1Brush * opacityBrush
 );
+
+void dxRTFillRectangle(
+	ID2D1RenderTarget * This,
+	D2D1_RECT_F rect,
+	ID2D1Brush * brush
+);
 void dxRTFillEllipse(
 	ID2D1RenderTarget * This,
 	D2D1_ELLIPSE ellipse,
 	ID2D1Brush * brush
 );
 
+void dxRTDrawLine(
+	ID2D1RenderTarget * This,
+	D2D1_POINT_2F point0,
+	D2D1_POINT_2F point1,
+	ID2D1Brush * brush,
+	FLOAT strokeWidth,
+	ID2D1StrokeStyle * strokeStyle
+);
+
 
 HRESULT dxHwndRTResize(ID2D1HwndRenderTarget * This, D2D1_SIZE_U sz);
+
+void dxRadialGradBrushSetCenter(
+	ID2D1RadialGradientBrush * This,
+	D2D1_POINT_2F center
+);
 
 #ifdef __cplusplus
 }

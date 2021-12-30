@@ -79,8 +79,8 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		(ID2D1RenderTarget *)pong->dx.pRT,
 		dxD2D1RadialGradientBrushProperties(
 			(D2D1_POINT_2F){
-				.x = PONG_MINW / 2.0f + pong->dx.ballRelPos.x,
-				.y = PONG_MINH / 2.0f + pong->dx.ballRelPos.y
+				.x = PONG_MINW / 2.0f + pong->logic.ballRelPos.x,
+				.y = PONG_MINH / 2.0f + pong->logic.ballRelPos.y
 			},
 			(D2D1_POINT_2F){ .x = 5.0f, .y = -2.0f },
 			PONG_BALL_X, PONG_BALL_Y
@@ -94,56 +94,8 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		return false;
 	}
 
-
-	// Create 2 rectangles to represent the bouncing surface
-	hr = dxFactoryCreateRectangleGeometry(
-		pong->dx.factory,
-		(D2D1_RECT_F){
-			.left   = 0.0f,
-			.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos,
-			.right  = PONG_WALL_X,
-			.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos
-		},
-		&pong->dx.pLeftWallGeo
-	);
-	if (FAILED(hr))
+	if (PongLogic_createAssets(&pong->logic, (ID2D1RenderTarget *)pong->dx.pRT) == false)
 	{
-		g_pongLastError = PongErr_dxGeo;
-		return false;
-	}
-
-	hr = dxFactoryCreateRectangleGeometry(
-		pong->dx.factory,
-		(D2D1_RECT_F){
-			.left   = (PONG_MINW - PONG_WALL_X),
-			.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos,
-			.right  = PONG_MINW,
-			.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos
-		},
-		&pong->dx.pRightWallGeo
-	);
-	if (FAILED(hr))
-	{
-		g_pongLastError = PongErr_dxGeo;
-		return false;
-	}
-
-	// Create 1 circle to represent the ball
-	hr = dxFactoryCreateEllipseGeometry(
-		pong->dx.factory,
-		(D2D1_ELLIPSE){
-			.point = {
-				.x = PONG_MINW / 2.0f + pong->dx.ballRelPos.x,
-				.y = PONG_MINH / 2.0f + pong->dx.ballRelPos.y
-			},
-			.radiusX = PONG_BALL_X,
-			.radiusY = PONG_BALL_Y
-		},
-		&pong->dx.pBallGeo
-	);
-	if (FAILED(hr))
-	{
-		g_pongLastError = PongErr_dxGeo;
 		return false;
 	}
 
@@ -151,7 +103,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 	pong->dx.assetsCreated = true;
 	return true;
 }
-void PongWnd_destroyAssets(PongWnd_t * restrict pong)
+void PongWnd_freeAssets(PongWnd_t * restrict pong)
 {
 	if (pong == NULL || pong->dx.assetsCreated == false)
 	{
@@ -160,11 +112,7 @@ void PongWnd_destroyAssets(PongWnd_t * restrict pong)
 	pong->dx.assetsCreated = false;
 
 	// Destroy assets here
-
-	// Geometries
-	dxSafeRelease((IUnknown **)&pong->dx.pBallGeo);
-	dxSafeRelease((IUnknown **)&pong->dx.pRightWallGeo);
-	dxSafeRelease((IUnknown **)&pong->dx.pLeftWallGeo);
+	PongLogic_freeAssets(&pong->logic);
 
 	// Brushes
 	dxSafeRelease((IUnknown **)&pong->dx.pBallBrush);
@@ -175,19 +123,6 @@ void PongWnd_destroyAssets(PongWnd_t * restrict pong)
 
 	// Hwnd render target
 	dxSafeRelease((IUnknown **)&pong->dx.pRT);
-}
-void PongWnd_updateAssets(PongWnd_t * restrict pong)
-{
-	if (pong == NULL || pong->dx.assetsCreated == false)
-	{
-		return;
-	}
-
-	// Update wall positions
-
-	// Update ball position
-
-
 }
 
 bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmdShow)
@@ -203,6 +138,8 @@ bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs,
 		.lpCmdArgs = lpCmdArgs,
 		.nCmdShow  = nCmdShow
 	};
+
+	PongLogic_create(&pong->logic);
 
 	// init d2d factory
 	HRESULT hr = dxD2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, (void **)&pong->dx.factory);
@@ -336,9 +273,11 @@ void PongWnd_free(PongWnd_t * restrict pong)
 		free(pong->wndTitle);
 		pong->wndTitle = NULL;
 	}
-	PongWnd_destroyAssets(pong);
+	PongWnd_freeAssets(pong);
 	dxSafeRelease(&pong->dx.wFactory);
 	dxSafeRelease((IUnknown **)&pong->dx.factory);
+
+	PongLogic_free(&pong->logic);
 }
 
 FLOAT PongWnd_dipx(const PongWnd_t * restrict pong, FLOAT x)
@@ -444,36 +383,55 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	dxRTClear((ID2D1RenderTarget *)pong->dx.pRT, (D2D1_COLOR_F){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f });
 
 
-	// Update geometry locations
-	//PongWnd_updateAssets(pong);
-
-	// Draw all geometries
-
-	// Walls
-	dxRTFillGeometry(
+	// Draw line in the center
+	dxRTDrawLine(
 		(ID2D1RenderTarget *)pong->dx.pRT,
-		(ID2D1Geometry *)pong->dx.pLeftWallGeo,
+		(D2D1_POINT_2F){ .x = PONG_MINW / 2.0f - 0.5f, .y = 0.0f },
+		(D2D1_POINT_2F){ .x = PONG_MINW / 2.0f + 0.5f, .y = PONG_MINH },
 		(ID2D1Brush *)pong->dx.pWhiteBrush,
-		NULL
-	);
-	dxRTFillGeometry(
-		(ID2D1RenderTarget *)pong->dx.pRT,
-		(ID2D1Geometry *)pong->dx.pRightWallGeo,
-		(ID2D1Brush *)pong->dx.pWhiteBrush,
+		1.0f,
 		NULL
 	);
 
-	// Ball
-	dxRTFillGeometry(
+	// Draw scores
+
+
+
+	// Draw walls
+	dxRTFillRectangle(
 		(ID2D1RenderTarget *)pong->dx.pRT,
-		(ID2D1Geometry *)pong->dx.pBallGeo,
-		(ID2D1Brush *)pong->dx.pBallBrush,
-		NULL
+		pong->logic.absLeftPad,
+		(ID2D1Brush *)pong->dx.pWhiteBrush
+	);
+	dxRTFillRectangle(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		pong->logic.absRightPad,
+		(ID2D1Brush *)pong->dx.pWhiteBrush
+	);
+
+	// Update ball brush center
+	dxRadialGradBrushSetCenter(
+		pong->dx.pBallBrush,
+		(D2D1_POINT_2F){
+			.x = pong->logic.absBall.x + 5.0f,
+			.y = pong->logic.absBall.y - 2.0f 
+		}
+	);
+
+	// Draw ball
+	dxRTFillEllipse(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(D2D1_ELLIPSE){
+			.point   = pong->logic.absBall,
+			.radiusX = PONG_BALL_X,
+			.radiusY = PONG_BALL_Y
+		},
+		(ID2D1Brush *)pong->dx.pBallBrush
 	);
 
 	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.pRT) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{
-		PongWnd_destroyAssets(pong);
+		PongWnd_freeAssets(pong);
 	}
 
 	EndPaint(pong->hwnd, &ps);
@@ -490,7 +448,7 @@ void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp)
 	dxHwndRTResize(pong->dx.pRT, (D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy });
 	
 	// Recreate assets
-	PongWnd_destroyAssets(pong);
+	PongWnd_freeAssets(pong);
 	PongWnd_createAssets(pong);
 }
 void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)

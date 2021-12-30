@@ -3,6 +3,7 @@
 
 #include "winapi.h"
 #include "d2dwrapper.h"
+#include "logic.h"
 #include <stdbool.h>
 
 extern bool g_pongClassRegistered;
@@ -15,15 +16,10 @@ typedef struct DxBoilerPlate
 	ID2D1HwndRenderTarget * pRT;
 
 	ID2D1SolidColorBrush * pWhiteBrush;
-	FLOAT leftWallRelPos, rightWallRelPos;
-	ID2D1RectangleGeometry * pLeftWallGeo, * pRightWallGeo;
-
-
+	
+	// Ball
 	ID2D1GradientStopCollection * pGradStops;
-	D2D1_POINT_2F ballRelPos;
 	ID2D1RadialGradientBrush * pBallBrush;
-	ID2D1EllipseGeometry * pBallGeo;
-
 
 	bool assetsCreated;
 
@@ -45,7 +41,11 @@ typedef struct PongWnd
 	FLOAT dpiX, dpiY;
 	DxBoilerPlate_t dx;
 
+	PongLogic_t logic;
+
 } PongWnd_t;
+
+
 
 /**
  * @brief Creates DX assets
@@ -60,7 +60,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong);
  * 
  * @param pong Pointer to PongWnd_t object
  */
-void PongWnd_destroyAssets(PongWnd_t * restrict pong);
+void PongWnd_freeAssets(PongWnd_t * restrict pong);
 
 /**
  * @brief Creates PongWnd_t object
