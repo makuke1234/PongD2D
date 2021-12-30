@@ -78,10 +78,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 	hr = dxRTCreateRadialGradientBrush(
 		(ID2D1RenderTarget *)pong->dx.pRT,
 		dxD2D1RadialGradientBrushProperties(
-			(D2D1_POINT_2F){
-				.x = PONG_MINW / 2.0f + pong->logic.ballRelPos.x,
-				.y = PONG_MINH / 2.0f + pong->logic.ballRelPos.y
-			},
+			pong->logic.absBall,
 			(D2D1_POINT_2F){ .x = 5.0f, .y = -2.0f },
 			PONG_BALL_X, PONG_BALL_Y
 		),

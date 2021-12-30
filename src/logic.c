@@ -64,9 +64,9 @@ void PongLogic_calcAbsLeftPad(PongLogic_t * logic)
 	}
 	logic->absLeftPad = (D2D1_RECT_F){
 		.left   = 0.0f,
-		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->leftPadRelPos,
+		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->relLeftPad,
 		.right  = PONG_WALL_X,
-		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->leftPadRelPos,
+		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->relLeftPad,
 	};
 }
 void PongLogic_calcAbsRightPad(PongLogic_t * logic)
@@ -77,9 +77,9 @@ void PongLogic_calcAbsRightPad(PongLogic_t * logic)
 	}
 	logic->absRightPad = (D2D1_RECT_F){
 		.left   = PONG_MINW - PONG_WALL_X,
-		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->rightPadRelPos,
+		.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + logic->relRightPad,
 		.right  = PONG_MINW,
-		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->rightPadRelPos
+		.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + logic->relRightPad
 	};
 }
 void PongLogic_calcAbsBall(PongLogic_t * logic)
@@ -89,7 +89,7 @@ void PongLogic_calcAbsBall(PongLogic_t * logic)
 		return;
 	}
 	logic->absBall = (D2D1_POINT_2F){
-		.x = PONG_MINW / 2.0f + logic->ballRelPos.x,
-		.y = PONG_MINH / 2.0f + logic->ballRelPos.y
+		.x = PONG_MINW / 2.0f,
+		.y = PONG_MINH / 2.0f
 	};
 }

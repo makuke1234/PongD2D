@@ -12,8 +12,7 @@ typedef struct PongLogic
 
 	bool assetsCreated;
 
-	float leftPadRelPos, rightPadRelPos;
-	D2D1_POINT_2F ballRelPos;
+	float relLeftPad, relRightPad;
 
 	D2D1_RECT_F absLeftPad, absRightPad;
 	D2D1_POINT_2F absBall;
