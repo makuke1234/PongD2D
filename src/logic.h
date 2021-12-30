@@ -61,4 +61,6 @@ void PongLogic_calcAbsBall(PongLogic_t * restrict logic);
 
 void PongLogic_reset(PongLogic_t * restrict logic);
 
+float clamp(float value, float min, float max);
+
 #endif

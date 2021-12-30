@@ -399,7 +399,6 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	// Draw scores
 
 
-
 	// Draw walls
 	dxRTFillRectangle(
 		(ID2D1RenderTarget *)pong->dx.pRT,
@@ -523,9 +522,46 @@ void PongWnd_onDpiChanged(PongWnd_t * restrict pong, LPARAM lp)
 }
 void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 {
+	consciousUnused(lp);
 
+	switch (wp)
+	{
+	case VK_ESCAPE:
+		if (pong->logic.scoring.mode == GameMode_normal)
+		{
+			pong->logic.scoring.notPaused ^= 1;
+			InvalidateRect(pong->hwnd, NULL, FALSE);
+		}
+		break;
+	// Left pad up
+	case L'W':
+		pong->logic.scoring.relLeftPad = clamp(pong->logic.scoring.relLeftPad - 1.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+		break;
+	// Left pad down
+	case L'S':
+		pong->logic.scoring.relLeftPad = clamp(pong->logic.scoring.relLeftPad + 1.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+		break;
+	// Right pad up
+	case VK_UP:
+		pong->logic.scoring.relRightPad = clamp(pong->logic.scoring.relRightPad - 1.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+		break;
+	// Right pad down
+	case VK_DOWN:
+		pong->logic.scoring.relRightPad = clamp(pong->logic.scoring.relRightPad + 1.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+		break;
+	case VK_RETURN:
+		if (pong->logic.scoring.mode != GameMode_normal || !pong->logic.scoring.notPaused)
+		{
+			PongLogic_reset(&pong->logic);
+		}
+		break;
+	}
 }
 void PongWnd_onKeyRelease(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 {
-	
+	consciousUnused(pong);
+	consciousUnused(wp);
+	consciousUnused(lp);
+	// Do nothing
 }
+

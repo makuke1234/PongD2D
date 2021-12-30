@@ -244,7 +244,7 @@ void dxRadialGradBrushSetCenter(
 HRESULT dxGeoCompareWithGeometry(
 	const ID2D1Geometry * This,
 	ID2D1Geometry * inputGeo,
-	D2D1_MATRIX_3X2_F inputGeoTransform,
+	const D2D1_MATRIX_3X2_F * inputGeoTransform,
 	D2D1_GEOMETRY_RELATION * relation
 )
 {

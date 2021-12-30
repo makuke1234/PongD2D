@@ -29,6 +29,114 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 		{
 		case GameMode_normal:
 		{
+			// Create left & right pad geometries, ball geometry
+
+			PongLogic_calcAbsLeftPad(logic);
+			PongLogic_calcAbsRightPad(logic);
+			PongLogic_calcAbsBall(logic);
+
+			ID2D1RectangleGeometry * plPadGeo, * prPadGeo;
+			ID2D1EllipseGeometry * pBallGeo;
+
+			bool failed = false;
+			HRESULT hr = dxFactoryCreateRectangleGeometry(
+				logic->pong->dx.factory,
+				logic->scoring.absLeftPad,
+				&plPadGeo
+			);
+			if (FAILED(hr))
+			{
+				failed = true;
+			}
+
+			hr = dxFactoryCreateRectangleGeometry(
+				logic->pong->dx.factory,
+				logic->scoring.absRightPad,
+				&prPadGeo
+			);
+			if (FAILED(hr))
+			{
+				failed = true;
+			}
+
+			hr = dxFactoryCreateEllipseGeometry(
+				logic->pong->dx.factory,
+				(D2D1_ELLIPSE){
+					.point   = logic->scoring.absBall,
+					.radiusX = PONG_BALL_X,
+					.radiusY = PONG_BALL_Y
+				},
+				&pBallGeo
+			);
+			if (FAILED(hr))
+			{
+				failed = true;
+			}
+
+			if (failed == true)
+			{
+				dxSafeRelease((IUnknown **)&plPadGeo);
+				dxSafeRelease((IUnknown **)&prPadGeo);
+				dxSafeRelease((IUnknown **)pBallGeo);
+				break;
+			}
+
+			// Check for "bad" collisions
+			bool collides = false;
+
+			D2D1_GEOMETRY_RELATION geoRel;
+
+			hr = dxGeoCompareWithGeometry(
+				(ID2D1Geometry *)pBallGeo,
+				(ID2D1Geometry *)logic->pLeftWallGeo,
+				NULL,
+				&geoRel
+			);
+			if (FAILED(hr))
+			{
+				failed = true;
+			}
+
+			if (failed == false && geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+			{
+				collides = true;
+			}
+
+			if (failed == false && !collides)
+			{
+				hr = dxGeoCompareWithGeometry(
+					(ID2D1Geometry *)pBallGeo,
+					(ID2D1Geometry *)logic->pRightWallGeo,
+					NULL,
+					&geoRel
+				);
+				if (FAILED(hr))
+				{
+					failed = true;
+				}
+				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+				{
+					collides = true;
+				}
+			}
+
+			if (collides)
+			{
+				logic->scoring.mode = GameMode_gameOver;
+			}
+
+			if (collides || failed)
+			{
+				dxSafeRelease((IUnknown **)&plPadGeo);
+				dxSafeRelease((IUnknown **)&prPadGeo);
+				dxSafeRelease((IUnknown **)&pBallGeo);
+				break;
+			}
+			
+			// If no "bad" collisions, check for "good"
+
+
+
 			break;
 		}
 		case GameMode_gameOver:
@@ -235,4 +343,23 @@ void PongLogic_reset(PongLogic_t * restrict logic)
 
 	// Reset scoring
 	logic->scoring = (Scoring_t){ 0 };
+
+	// Update screen
+	InvalidateRect(logic->pong->hwnd, NULL, FALSE);
+}
+
+float clamp(float value, float min, float max)
+{
+	if (value < min)
+	{
+		return min;
+	}
+	else if (value > max)
+	{
+		return max;
+	}
+	else
+	{
+		return value;
+	}
 }

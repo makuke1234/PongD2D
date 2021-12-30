@@ -15,7 +15,7 @@
 #define PONG_WALL_X 10.0f
 #define PONG_WALL_Y 60.0f
 
-#define PONG_WALL_MAX_ARTIC ((PONG_MINH - PONG_WALL_Y) / 2.0f)
+#define PONG_WALL_MAX ((PONG_MINH - PONG_WALL_Y) / 2.0f)
 
 
 #endif
