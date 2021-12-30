@@ -53,17 +53,18 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		return false;
 	}
 
-	D2D1_GRADIENT_STOP stops[2];
-	stops[0].color = (D2D1_COLOR_F){ .r = 1.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f };
-	stops[0].position = 0.0f,
-	stops[1].color = (D2D1_COLOR_F){ .r = 0.9f, .g = 0.1f, .b = 0.1f, .a = 1.0f };
-	stops[1].position = 1.0f;
-
+	D2D1_GRADIENT_STOP gradientStops[3];
+	gradientStops[0].color = (D2D1_COLOR_F){ 1.0f, 1.0f, 1.0f, 1.0f };
+	gradientStops[0].position = 0.0f;
+	gradientStops[1].color = (D2D1_COLOR_F){ 0.5f, 0.5f, 0.5f, 1.0f };
+	gradientStops[1].position = 0.6f;
+	gradientStops[2].color = (D2D1_COLOR_F){ 0.2f, 0.2f, 0.2f, 1.0f };
+	gradientStops[2].position = 1.0f;
 
 	hr = dxRTCreateGradientStopCollection(
 		(ID2D1RenderTarget *)pong->dx.pRT,
-		stops,
-		2,
+		gradientStops,
+		3,
 		D2D1_GAMMA_2_2,
 		D2D1_EXTEND_MODE_CLAMP,
 		&pong->dx.pGradStops
@@ -77,8 +78,11 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 	hr = dxRTCreateRadialGradientBrush(
 		(ID2D1RenderTarget *)pong->dx.pRT,
 		dxD2D1RadialGradientBrushProperties(
-			(D2D1_POINT_2F){ .x = PONG_BALL_X, .y = PONG_BALL_Y },
-			(D2D1_POINT_2F){ .x = 0.0f, .y = 0.0f },
+			(D2D1_POINT_2F){
+				.x = PONG_MINW / 2.0f + pong->dx.ballRelPos.x,
+				.y = PONG_MINH / 2.0f + pong->dx.ballRelPos.y
+			},
+			(D2D1_POINT_2F){ .x = 5.0f, .y = -2.0f },
 			PONG_BALL_X, PONG_BALL_Y
 		),
 		pong->dx.pGradStops,
@@ -89,6 +93,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		g_pongLastError = PongErr_dxBrush;
 		return false;
 	}
+
 
 	// Create 2 rectangles to represent the bouncing surface
 	hr = dxFactoryCreateRectangleGeometry(
@@ -465,7 +470,6 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 		(ID2D1Brush *)pong->dx.pBallBrush,
 		NULL
 	);
-
 
 	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.pRT) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{

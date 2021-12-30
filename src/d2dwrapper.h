@@ -71,6 +71,7 @@ HRESULT dxRTCreateRadialGradientBrush(
 	ID2D1GradientStopCollection * gradientStops,
 	ID2D1RadialGradientBrush ** ppBrush
 );
+
 D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES dxD2D1RadialGradientBrushProperties(
 	D2D1_POINT_2F center,
 	D2D1_POINT_2F originOffset,
@@ -86,6 +87,13 @@ HRESULT dxRTCreateGradientStopCollection(
 	ID2D1GradientStopCollection ** ppGradStopCollection
 );
 
+HRESULT dxRTCreateLinearGradientBrush(
+	ID2D1RenderTarget * This,
+	D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES props,
+	ID2D1GradientStopCollection * gradientStops,
+	ID2D1LinearGradientBrush ** ppBrush
+);
+
 void dxRTDrawGeometry(
 	ID2D1RenderTarget * This,
 	ID2D1Geometry * geometry,
@@ -99,6 +107,12 @@ void dxRTFillGeometry(
 	ID2D1Brush * brush,
 	ID2D1Brush * opacityBrush
 );
+void dxRTFillEllipse(
+	ID2D1RenderTarget * This,
+	D2D1_ELLIPSE ellipse,
+	ID2D1Brush * brush
+);
+
 
 HRESULT dxHwndRTResize(ID2D1HwndRenderTarget * This, D2D1_SIZE_U sz);
 
