@@ -12,7 +12,18 @@ typedef struct DxBoilerPlate
 	ID2D1Factory * factory;
 	IUnknown * wFactory;
 
-	ID2D1HwndRenderTarget * hwndRT;
+	ID2D1HwndRenderTarget * pRT;
+
+	ID2D1SolidColorBrush * pWhiteBrush;
+	FLOAT leftWallRelPos, rightWallRelPos;
+	ID2D1RectangleGeometry * pLeftWallGeo, * pRightWallGeo;
+
+
+	ID2D1GradientStopCollection * pGradStops;
+	D2D1_POINT_2F ballRelPos;
+	ID2D1RadialGradientBrush * pBallBrush;
+	ID2D1EllipseGeometry * pBallGeo;
+
 
 	bool assetsCreated;
 

@@ -6,7 +6,10 @@ const wchar_t * c_errorIds[PongErr_num_errs] = {
 	L"Error creating window!",
 	L"Error creating D2D factory!",
 	L"Error creating DWrite factory!",
-	L"Error creating D2D render target!"
+	L"Error creating D2D render target!",
+	L"Error creating D2D brush!",
+	L"Error creating D2D gradient!",
+	L"Error creating D2D geometry!"
 };
 
 PongErr_e g_pongLastError = PongErr_unknown;

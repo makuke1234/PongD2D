@@ -33,7 +33,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 			(D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy },
 			D2D1_PRESENT_OPTIONS_NONE
 		),
-		&pong->dx.hwndRT
+		&pong->dx.pRT
 	);
 	if (FAILED(hr))
 	{
@@ -41,11 +41,106 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		return false;
 	}
 
-	// Create 1 rectangle to represent the bouncing surface
+	// Create Brushes
+	hr = dxRTCreateSolidColorBrush(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(D2D1_COLOR_F){ .r = 1.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f },
+		&pong->dx.pWhiteBrush
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxBrush;
+		return false;
+	}
 
+	D2D1_GRADIENT_STOP stops[2];
+	stops[0].color = (D2D1_COLOR_F){ .r = 1.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f };
+	stops[0].position = 0.0f,
+	stops[1].color = (D2D1_COLOR_F){ .r = 0.9f, .g = 0.1f, .b = 0.1f, .a = 1.0f };
+	stops[1].position = 1.0f;
+
+
+	hr = dxRTCreateGradientStopCollection(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		stops,
+		2,
+		D2D1_GAMMA_2_2,
+		D2D1_EXTEND_MODE_CLAMP,
+		&pong->dx.pGradStops
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxGradient;
+		return false;
+	}
+
+	hr = dxRTCreateRadialGradientBrush(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		dxD2D1RadialGradientBrushProperties(
+			(D2D1_POINT_2F){ .x = PONG_BALL_X, .y = PONG_BALL_Y },
+			(D2D1_POINT_2F){ .x = 0.0f, .y = 0.0f },
+			PONG_BALL_X, PONG_BALL_Y
+		),
+		pong->dx.pGradStops,
+		&pong->dx.pBallBrush
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxBrush;
+		return false;
+	}
+
+	// Create 2 rectangles to represent the bouncing surface
+	hr = dxFactoryCreateRectangleGeometry(
+		pong->dx.factory,
+		(D2D1_RECT_F){
+			.left   = 0.0f,
+			.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos,
+			.right  = PONG_WALL_X,
+			.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos
+		},
+		&pong->dx.pLeftWallGeo
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxGeo;
+		return false;
+	}
+
+	hr = dxFactoryCreateRectangleGeometry(
+		pong->dx.factory,
+		(D2D1_RECT_F){
+			.left   = (PONG_MINW - PONG_WALL_X),
+			.top    = (PONG_MINH - PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos,
+			.right  = PONG_MINW,
+			.bottom = (PONG_MINH + PONG_WALL_Y) / 2.0f + pong->dx.rightWallRelPos
+		},
+		&pong->dx.pRightWallGeo
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxGeo;
+		return false;
+	}
 
 	// Create 1 circle to represent the ball
-
+	hr = dxFactoryCreateEllipseGeometry(
+		pong->dx.factory,
+		(D2D1_ELLIPSE){
+			.point = {
+				.x = PONG_MINW / 2.0f + pong->dx.ballRelPos.x,
+				.y = PONG_MINH / 2.0f + pong->dx.ballRelPos.y
+			},
+			.radiusX = PONG_BALL_X,
+			.radiusY = PONG_BALL_Y
+		},
+		&pong->dx.pBallGeo
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxGeo;
+		return false;
+	}
 
 	// return successfully
 	pong->dx.assetsCreated = true;
@@ -60,7 +155,34 @@ void PongWnd_destroyAssets(PongWnd_t * restrict pong)
 	pong->dx.assetsCreated = false;
 
 	// Destroy assets here
-	dxSafeRelease((IUnknown **)&pong->dx.hwndRT);
+
+	// Geometries
+	dxSafeRelease((IUnknown **)&pong->dx.pBallGeo);
+	dxSafeRelease((IUnknown **)&pong->dx.pRightWallGeo);
+	dxSafeRelease((IUnknown **)&pong->dx.pLeftWallGeo);
+
+	// Brushes
+	dxSafeRelease((IUnknown **)&pong->dx.pBallBrush);
+	dxSafeRelease((IUnknown **)&pong->dx.pWhiteBrush);
+
+	// Gradient stops
+	dxSafeRelease((IUnknown **)&pong->dx.pGradStops);
+
+	// Hwnd render target
+	dxSafeRelease((IUnknown **)&pong->dx.pRT);
+}
+void PongWnd_updateAssets(PongWnd_t * restrict pong)
+{
+	if (pong == NULL || pong->dx.assetsCreated == false)
+	{
+		return;
+	}
+
+	// Update wall positions
+
+	// Update ball position
+
+
 }
 
 bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs, int nCmdShow)
@@ -135,11 +257,6 @@ bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs,
 
 	PongWnd_calcDpiSpecific(pong);
 
-	if (PongWnd_createAssets(pong) == false)
-	{
-		return false;
-	}
-
 	SetWindowPos(
 		pong->hwnd,
 		NULL,
@@ -149,6 +266,11 @@ bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs,
 		pong->minSize.cy,
 		SWP_NOZORDER | SWP_NOMOVE
 	);
+
+	if (PongWnd_createAssets(pong) == false)
+	{
+		return false;
+	}
 
 	ShowWindow(pong->hwnd, nCmdShow);
 	UpdateWindow(pong->hwnd);
@@ -311,12 +433,41 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	HDC hdc = BeginPaint(pong->hwnd, &ps);
 	consciousUnused(hdc);
 
-	dxRTBeginDraw((ID2D1RenderTarget *)pong->dx.hwndRT);
-	dxRTSetTransform((ID2D1RenderTarget *)pong->dx.hwndRT, dxD2D1Matrix3x2FIdentity());
+	dxRTBeginDraw((ID2D1RenderTarget *)pong->dx.pRT);
+	dxRTSetTransform((ID2D1RenderTarget *)pong->dx.pRT, dxD2D1Matrix3x2FIdentity());
 	// Draw black background
-	dxRTClear((ID2D1RenderTarget *)pong->dx.hwndRT, (D2D1_COLOR_F){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f });
+	dxRTClear((ID2D1RenderTarget *)pong->dx.pRT, (D2D1_COLOR_F){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f });
 
-	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.hwndRT) == (HRESULT)D2DERR_RECREATE_TARGET)
+
+	// Update geometry locations
+	//PongWnd_updateAssets(pong);
+
+	// Draw all geometries
+
+	// Walls
+	dxRTFillGeometry(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(ID2D1Geometry *)pong->dx.pLeftWallGeo,
+		(ID2D1Brush *)pong->dx.pWhiteBrush,
+		NULL
+	);
+	dxRTFillGeometry(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(ID2D1Geometry *)pong->dx.pRightWallGeo,
+		(ID2D1Brush *)pong->dx.pWhiteBrush,
+		NULL
+	);
+
+	// Ball
+	dxRTFillGeometry(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(ID2D1Geometry *)pong->dx.pBallGeo,
+		(ID2D1Brush *)pong->dx.pBallBrush,
+		NULL
+	);
+
+
+	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.pRT) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{
 		PongWnd_destroyAssets(pong);
 	}
@@ -325,14 +476,18 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 }
 void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp)
 {
-	if (pong->dx.hwndRT == NULL)
+	if (pong->dx.pRT == NULL)
 	{
 		return;
 	}
 	pong->size.cx = LOWORD(lp);
 	pong->size.cy = HIWORD(lp);
 
-	dxHwndRTResize(pong->dx.hwndRT, (D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy });
+	dxHwndRTResize(pong->dx.pRT, (D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy });
+	
+	// Recreate assets
+	PongWnd_destroyAssets(pong);
+	PongWnd_createAssets(pong);
 }
 void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 {
@@ -383,12 +538,12 @@ void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 }
 void PongWnd_onDpiChanged(PongWnd_t * restrict pong, LPARAM lp)
 {
-	if (pong->dx.hwndRT == NULL)
+	if (pong->dx.pRT == NULL)
 	{
 		return;
 	}
 
-	dxRTGetDpi((ID2D1RenderTarget *)pong->dx.hwndRT, &pong->dpiX, &pong->dpiY);
+	dxRTGetDpi((ID2D1RenderTarget *)pong->dx.pRT, &pong->dpiX, &pong->dpiY);
 
 	RECT * newr = (RECT *)lp;
 	SetWindowPos(

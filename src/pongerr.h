@@ -12,6 +12,9 @@ typedef enum PongErr
 	PongErr_dxFactory,
 	PongErr_dwFactory,
 	PongErr_dxRT,
+	PongErr_dxBrush,
+	PongErr_dxGradient,
+	PongErr_dxGeo,
 
 	PongErr_num_errs
 } PongErr_e;
