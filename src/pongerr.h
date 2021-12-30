@@ -15,6 +15,7 @@ typedef enum PongErr
 	PongErr_dxBrush,
 	PongErr_dxGradient,
 	PongErr_dxGeo,
+	PongErr_thread,
 
 	PongErr_num_errs
 } PongErr_e;

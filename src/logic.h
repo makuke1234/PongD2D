@@ -4,9 +4,11 @@
 #include "winapi.h"
 #include "d2dwrapper.h"
 
+struct PongWnd;
+
 typedef struct PongLogic
 {
-	ID2D1RenderTarget * pRT;
+	struct PongWnd * pong;
 	ID2D1RectangleGeometry * pUpWallGeo, * pDownWallGeo;
 	ID2D1RectangleGeometry * pLeftWallGeo, * pRightWallGeo;
 
@@ -20,13 +22,16 @@ typedef struct PongLogic
 	float ballAngle;
 
 	HANDLE logicThread;
+	bool killThreadFlag;
 
 } PongLogic_t;
 
-bool PongLogic_create(PongLogic_t * restrict logic);
+DWORD WINAPI PongLogic_thread(LPVOID param);
+
+bool PongLogic_create(PongLogic_t * restrict logic, struct PongWnd * hwnd);
 void PongLogic_free(PongLogic_t * restrict logic);
 
-bool PongLogic_createAssets(PongLogic_t * restrict logic, ID2D1RenderTarget * pRT);
+bool PongLogic_createAssets(PongLogic_t * restrict logic);
 void PongLogic_freeAssets(PongLogic_t * restrict logic);
 
 void PongLogic_calcAbsLeftPad(PongLogic_t * logic);

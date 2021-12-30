@@ -91,7 +91,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		return false;
 	}
 
-	if (PongLogic_createAssets(&pong->logic, (ID2D1RenderTarget *)pong->dx.pRT) == false)
+	if (PongLogic_createAssets(&pong->logic) == false)
 	{
 		return false;
 	}
@@ -102,7 +102,7 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 }
 void PongWnd_freeAssets(PongWnd_t * restrict pong)
 {
-	if (pong == NULL || pong->dx.assetsCreated == false)
+	if (pong == NULL)
 	{
 		return;
 	}
@@ -136,7 +136,7 @@ bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs,
 		.nCmdShow  = nCmdShow
 	};
 
-	PongLogic_create(&pong->logic);
+	PongLogic_create(&pong->logic, pong);
 
 	// init d2d factory
 	HRESULT hr = dxD2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, (void **)&pong->dx.factory);
