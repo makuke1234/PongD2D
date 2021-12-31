@@ -94,16 +94,48 @@ FLOAT PongWnd_dipy(const PongWnd_t * restrict pong, FLOAT y);
 FLOAT PongWnd_dpix(const PongWnd_t * restrict pong, FLOAT x);
 FLOAT PongWnd_dpiy(const PongWnd_t * restrict pong, FLOAT y);
 
+/**
+ * @brief Calculates all DPI-specific sizes
+ * 
+ * @param pong Pointer to PongWnd_t object
+ */
 void PongWnd_calcDpiSpecific(PongWnd_t * restrict pong);
 
+/**
+ * @brief Win32 window procedure "hub" that deals with all incoming messages
+ * for all windows of one windows class
+ */
 LRESULT CALLBACK PongWnd_winProcHub(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+/**
+ * @brief OO object-specific function call
+ * 
+ * @param pong Pointer to PongWnd_t object
+ */
 LRESULT PongWnd_winProc(PongWnd_t * pong, HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
+/**
+ * @brief Rendering sub-method, WM_PAINT msg
+ */
 void PongWnd_onRender(PongWnd_t * restrict pong);
+/**
+ * @brief Size sub-method, WM_SIZE msg
+ */
 void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp);
+/**
+ * @brief Active-resizing sub-method, WM_SIZING msg
+ */
 void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp);
+/**
+ * @brief DPI changing sub-method, WM_DPICHANGED msg
+ */
 void PongWnd_onDpiChanged(PongWnd_t * restrict pong, LPARAM lp);
+/**
+ * @brief Key press-down sub-method, WM_KEYDOWN msg
+ */
 void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp);
+/**
+ * @brief Key release sub-method, WM_KEYUP msg
+ */
 void PongWnd_onKeyRelease(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp);
 
 #endif
