@@ -431,7 +431,7 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 		(ID2D1Brush *)pong->dx.pBallBrush
 	);
 
-	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.pRT) == (HRESULT)D2DERR_RECREATE_TARGET)
+	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.pRT, NULL, NULL) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{
 		PongWnd_freeAssets(pong);
 	}

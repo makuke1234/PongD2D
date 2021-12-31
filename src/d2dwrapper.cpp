@@ -101,17 +101,17 @@ void dxRTBeginDraw(ID2D1RenderTarget * This)
 {
 	This->BeginDraw();
 }
-void dxRTSetTransform(ID2D1RenderTarget * This, D2D1_MATRIX_3X2_F identity)
+void dxRTSetTransform(ID2D1RenderTarget * This, D2D1_MATRIX_3X2_F transform)
 {
-	This->SetTransform(identity);
+	This->SetTransform(transform);
 }
 void dxRTClear(ID2D1RenderTarget * This, D2D1_COLOR_F color)
 {
 	This->Clear(color);
 }
-HRESULT dxRTEndDraw(ID2D1RenderTarget * This)
+HRESULT dxRTEndDraw(ID2D1RenderTarget * This, D2D1_TAG * tag1, D2D1_TAG * tag2)
 {
-	return This->EndDraw();
+	return This->EndDraw(tag1, tag2);
 }
 
 HRESULT dxRTCreateSolidColorBrush(
