@@ -12,7 +12,16 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 
 	while (logic->killThreadFlag == false)
 	{
-		while (!logic->scoring.notPaused)
+		if (logic->requestReset)
+		{
+			logic->requestReset = false;
+			// Spin-loop waiting
+			while (!logic->requestReset);
+
+			logic->requestReset = false;
+		}
+
+		while (!logic->scoring.notPaused && !logic->requestReset)
 		{
 			Sleep(20);
 			if (logic->killThreadFlag)
@@ -219,6 +228,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 
 PongLogic_thread_finish: ;
 
+	logic->logicThread = NULL;
 	return 0;
 }
 
@@ -399,11 +409,18 @@ void PongLogic_calcAbsBall(PongLogic_t * restrict logic)
 	};
 }
 
-void PongLogic_reset(PongLogic_t * restrict logic)
+void PongLogic_reset(PongLogic_t * logic)
 {
 	if (logic == NULL)
 	{
 		return;
+	}
+
+	if (logic->logicThread != NULL)
+	{
+		logic->requestReset = true;
+		// Do nothing smart
+		while (logic->requestReset);
 	}
 
 	// Reset scoring
@@ -414,8 +431,11 @@ void PongLogic_reset(PongLogic_t * restrict logic)
 	PongLogic_calcAbsRightPad(logic);
 	PongLogic_calcAbsBall(logic);
 
-	// Update screen
-	InvalidateRect(logic->pong->hwnd, NULL, FALSE);
+	if (logic->logicThread != NULL)
+	{
+		logic->requestReset = true;
+		while (logic->requestReset);
+	}
 }
 
 float clamp(float value, float min, float max)

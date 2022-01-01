@@ -41,6 +41,7 @@ typedef struct PongLogic
 	bool assetsCreated;
 
 	Scoring_t scoring;
+	bool requestReset;
 
 	HANDLE logicThread;
 	bool killThreadFlag;
@@ -110,7 +111,7 @@ void PongLogic_calcAbsBall(PongLogic_t * restrict logic);
  * 
  * @param logic Pointer to PongLogic_t object
  */
-void PongLogic_reset(PongLogic_t * restrict logic);
+void PongLogic_reset(PongLogic_t * logic);
 
 /**
  * @brief "Clamps" a floating-point value to be within min and max
