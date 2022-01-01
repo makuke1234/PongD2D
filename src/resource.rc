@@ -32,7 +32,7 @@ BEGIN
 			VALUE "FileDescription", "A version of Pong written in C and using Direct2D"
 			VALUE "FileVersion", "1.0.2"
 			VALUE "InternalName", "Win32App"
-			VALUE "LegalCopyright", "\xA92021 Maku Maku"
+			VALUE "LegalCopyright", "\xA92022 Maku Maku"
 			VALUE "OriginalFileName", "PongD2D.exe"
 			VALUE "ProductName", "PongD2D"
 			VALUE "ProductVersion", "1.0.2"
