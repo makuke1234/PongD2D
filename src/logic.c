@@ -45,6 +45,17 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			PongLogic_calcAbsLeftPad(logic);
 			PongLogic_calcAbsRightPad(logic);
 
+			// Move ball in direction given to it
+
+			float vx =  PONG_BALL_VELOCITY * cosf(logic->scoring.ballAngle);
+			float vy = -PONG_BALL_VELOCITY * sinf(logic->scoring.ballAngle);
+
+			float dx = delta * vx;
+			float dy = delta * vy;
+
+			logic->scoring.absBall.x = clamp(logic->scoring.absBall.x + dx, PONG_BALL_X, PONG_MINW - PONG_BALL_X);
+			logic->scoring.absBall.y = clamp(logic->scoring.absBall.y + dy, PONG_BALL_Y, PONG_MINH - PONG_BALL_Y);
+
 			ID2D1RectangleGeometry * plPadGeo, * prPadGeo;
 			ID2D1EllipseGeometry * pBallGeo;
 
@@ -177,6 +188,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				{
 					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
 					++logic->scoring.leftScore;
+					logic->scoring.absBall.x = PONG_WALL_X + PONG_BALL_X;
 					goto PongLogic_thread_release_rsc;
 				}
 
@@ -195,6 +207,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				{
 					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
 					++logic->scoring.rightScore;
+					logic->scoring.absBall.x = PONG_MINW - (PONG_WALL_X + PONG_BALL_X);
 					goto PongLogic_thread_release_rsc;
 				}
 			}
@@ -204,17 +217,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			dxSafeRelease((IUnknown **)&plPadGeo);
 			dxSafeRelease((IUnknown **)&prPadGeo);
 			dxSafeRelease((IUnknown **)&pBallGeo);
-
-			// Move ball in direction given to it
-
-			float vx =  PONG_BALL_VELOCITY * cosf(logic->scoring.ballAngle);
-			float vy = -PONG_BALL_VELOCITY * sinf(logic->scoring.ballAngle);
-
-			float dx = delta * vx;
-			float dy = delta * vy;
-
-			logic->scoring.absBall.x = clamp(logic->scoring.absBall.x + dx, PONG_BALL_X, PONG_MINW - PONG_BALL_X);
-			logic->scoring.absBall.y = clamp(logic->scoring.absBall.y + dy, PONG_BALL_Y, PONG_MINH - PONG_BALL_Y);
 
 			break;
 		}
