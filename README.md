@@ -9,7 +9,7 @@ A pong fork written in C utilising Direct2D API (similar to my other project [Sn
 
 # Obtaining
 
-Not yet. :/
+Pre-release Windows binary can be downloaded [here](https://github.com/makuke1234/PongD2D/releases/tag/Pre-release_0.9.1).
 
 
 # Controls
