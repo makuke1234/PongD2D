@@ -12,8 +12,8 @@ IDI_APPLICATION ICON "assets/icon.ico"
 // Version info
 #include <winver.h>
 VS_VERSION_INFO		VERSIONINFO
-FILEVERSION			0,0,2
-PRODUCTVERSION		0,0,2
+FILEVERSION			0,9,0
+PRODUCTVERSION		0,9,0
 FILEFLAGSMASK		VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
 	FILEFLAGS		VS_FF_DEBUG | VS_FF_PRERELEASE
@@ -30,12 +30,12 @@ BEGIN
 		BEGIN
 			VALUE "CompanyName", "Maku Maku"
 			VALUE "FileDescription", "A version of Pong written in C and using Direct2D"
-			VALUE "FileVersion", "0.0.2"
+			VALUE "FileVersion", "0.9.0"
 			VALUE "InternalName", "Win32App"
 			VALUE "LegalCopyright", "\xA92021 Maku Maku"
 			VALUE "OriginalFileName", "PongD2D.exe"
 			VALUE "ProductName", "PongD2D"
-			VALUE "ProductVersion", "0.0.2"
+			VALUE "ProductVersion", "0.9.0"
 		END
 	END
 	BLOCK "VarFileInfo"
