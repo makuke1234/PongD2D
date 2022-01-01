@@ -1,6 +1,6 @@
 # PongD2D
 
-![Release version](https://img.shields.io/badge/release-v0.9.1-yellow.svg)
+![Release version](https://img.shields.io/badge/release-v1.0.0-green.svg)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
@@ -9,7 +9,7 @@ A pong fork written in C utilising Direct2D API (similar to my other project [Sn
 
 # Obtaining
 
-Pre-release Windows binary can be downloaded [here](https://github.com/makuke1234/PongD2D/releases/tag/Pre-release_0.9.1).
+Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/releases/tag/Pre-release_1.0.0).
 
 
 # Controls
