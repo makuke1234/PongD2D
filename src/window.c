@@ -92,7 +92,110 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 	}
 
 	// Create DirectWrite assets
+	hr = dwFactoryCreateTextFormat(
+		pong->dx.wFactory,
+		L"Consolas",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		16.0f,
+		L"",
+		&pong->dx.consolas16
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dwFont;
+		return false;
+	}
+	hr = dwFactoryCreateTextFormat(
+		pong->dx.wFactory,
+		L"Consolas",
+		NULL,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		16.0f,
+		L"",
+		&pong->dx.consolas16Centered
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dwFont;
+		return false;
+	}
+	hr = dwFactoryCreateTextFormat(
+		pong->dx.wFactory,
+		L"Consolas",
+		NULL,
+		DWRITE_FONT_WEIGHT_BOLD,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		24.0f,
+		L"",
+		&pong->dx.consolas24CenteredBold
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dwFont;
+		return false;
+	}
 
+
+	// Set alignment
+	hr = dwTFmtSetTextAlignment(
+		pong->dx.consolas16Centered,
+		DWRITE_TEXT_ALIGNMENT_CENTER
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dwFontAlignment;
+		return false;
+	}
+	hr = dwTFmtSetTextAlignment(
+		pong->dx.consolas24CenteredBold,
+		DWRITE_TEXT_ALIGNMENT_CENTER
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dwFontAlignment;
+		return false;
+	}
+
+
+	
+	hr = dxRTCreateSolidColorBrush(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(D2D1_COLOR_F){ .r = 0.600f, .g = 0.851f, .b = 0.918f, .a = 1.000f },
+		&pong->dx.pPauseBrush
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxBrush;
+		return false;
+	}
+	
+	hr = dxRTCreateSolidColorBrush(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(D2D1_COLOR_F){ .r = 0.945f, .g = 0.294f, .b = 0.329f, .a = 1.000f },
+		&pong->dx.pGameOverBrush
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxBrush;
+		return false;
+	}
+
+	hr = dxRTCreateSolidColorBrush(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		(D2D1_COLOR_F){ .r = 0.000f, .g = 0.769f, .b = 0.459f, .a = 1.000f },
+		&pong->dx.pWinBrush
+	);
+	if (FAILED(hr))
+	{
+		g_pongLastError = PongErr_dxBrush;
+		return false;
+	}
 
 
 	// Create assets for game logic
@@ -116,7 +219,15 @@ void PongWnd_freeAssets(PongWnd_t * restrict pong)
 	// Destroy assets here
 	PongLogic_freeAssets(&pong->logic);
 
+	// Text formats
+	dxSafeRelease(&pong->dx.consolas24CenteredBold);
+	dxSafeRelease(&pong->dx.consolas16Centered);
+	dxSafeRelease(&pong->dx.consolas16);
+
 	// Brushes
+	dxSafeRelease((IUnknown **)&pong->dx.pWinBrush);
+	dxSafeRelease((IUnknown **)&pong->dx.pGameOverBrush);
+	dxSafeRelease((IUnknown **)&pong->dx.pPauseBrush);
 	dxSafeRelease((IUnknown **)&pong->dx.pBallBrush);
 	dxSafeRelease((IUnknown **)&pong->dx.pWhiteBrush);
 
@@ -402,6 +513,78 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	);
 
 	// Draw scores
+	wchar_t temp[256];
+	wsprintfW(temp, L"%u", pong->logic.scoring.leftScore);
+
+	dxRTDrawTextW(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		temp,
+		(UINT32)wcslen(temp),
+		pong->dx.consolas24CenteredBold,
+		(D2D1_RECT_F){
+			.left   = 0.0f,
+			.top    = 10.0f,
+			.right  = PONG_MINW / 2.0f,
+			.bottom = 10.0f
+		},
+		(ID2D1Brush *)pong->dx.pWhiteBrush,
+		D2D1_DRAW_TEXT_OPTIONS_NONE,
+		DWRITE_MEASURING_MODE_NATURAL
+	);
+
+	wsprintfW(temp, L"%u", pong->logic.scoring.rightScore);
+
+	dxRTDrawTextW(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		temp,
+		(UINT32)wcslen(temp),
+		pong->dx.consolas24CenteredBold,
+		(D2D1_RECT_F){
+			.left   = PONG_MINW / 2.0f,
+			.top    = 10.0f,
+			.right  = PONG_MINW,
+			.bottom = 10.0f
+		},
+		(ID2D1Brush *)pong->dx.pWhiteBrush,
+		D2D1_DRAW_TEXT_OPTIONS_NONE,
+		DWRITE_MEASURING_MODE_NATURAL
+	);
+
+
+	// Draw time
+
+	{
+		float time = pong->logic.scoring.time;
+		uint64_t ltime = (uint64_t)time;
+		uint32_t seconds = (uint32_t)(ltime % 60ull);
+		uint32_t milliseconds = (uint32_t)((time - (float)ltime) * 1000.0f);
+		uint32_t hours = (uint32_t)(ltime / 3600ull);
+		uint32_t minutes = (uint32_t)(ltime - (uint64_t)hours * 3600ull - seconds) / 60u;
+		wsprintfW(
+			temp,
+			L"%.2u:%.2u:%.2u.%.3u",
+			hours,
+			minutes,
+			seconds,
+			milliseconds
+		);
+	}
+
+	dxRTDrawTextW(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		temp,
+		(UINT32)wcslen(temp),
+		pong->dx.consolas16Centered,
+		(D2D1_RECT_F){
+			.left   = 0.0f,
+			.top    = PONG_MINH - 16.f,
+			.right  = PONG_MINW,
+			.bottom = PONG_MINH
+		},
+		(ID2D1Brush *)pong->dx.pWhiteBrush,
+		D2D1_DRAW_TEXT_OPTIONS_NONE,
+		DWRITE_MEASURING_MODE_NATURAL
+	);
 
 
 	// Draw walls
@@ -435,6 +618,109 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 		},
 		(ID2D1Brush *)pong->dx.pBallBrush
 	);
+
+	// Draw game over screen
+	if (!pong->logic.scoring.notPaused)
+	{
+		const wchar_t pauseStr[] = L"The game has been paused.",
+			pauseStr2[] = L"Press 'ESCAPE' to resume or 'ENTER' to restart.";
+
+		dxRTDrawTextW(
+			(ID2D1RenderTarget *)pong->dx.pRT,
+			pauseStr,
+			(sizeof(pauseStr) - 1) / sizeof(wchar_t),
+			pong->dx.consolas24CenteredBold,
+			(D2D1_RECT_F){
+				.left   = 20.0f,
+				.top    = 144.0f,
+				.right  = PONG_MINW - 20.0f,
+				.bottom = 144.0f
+			},
+			(ID2D1Brush *)pong->dx.pPauseBrush,
+			D2D1_DRAW_TEXT_OPTIONS_NONE,
+			DWRITE_MEASURING_MODE_NATURAL
+		);
+
+		dxRTDrawTextW(
+			(ID2D1RenderTarget *)pong->dx.pRT,
+			pauseStr2,
+			(sizeof(pauseStr2) - 1) / sizeof(wchar_t),
+			pong->dx.consolas24CenteredBold,
+			(D2D1_RECT_F){
+				.left   = 20.0f,
+				.top    = 360.0f,
+				.right  = PONG_MINW - 20.0f,
+				.bottom = 360.0f
+			},
+			(ID2D1Brush *)pong->dx.pPauseBrush,
+			D2D1_DRAW_TEXT_OPTIONS_NONE,
+			DWRITE_MEASURING_MODE_NATURAL
+		);
+	}
+	else if (pong->logic.scoring.mode == GameMode_gameOver)
+	{
+		const wchar_t goString[] = L"Game over!";
+		dxRTDrawTextW(
+			(ID2D1RenderTarget *)pong->dx.pRT,
+			goString,
+			(sizeof(goString) - 1) / sizeof(wchar_t),
+			pong->dx.consolas24CenteredBold,
+			(D2D1_RECT_F){
+				.left   = 20.0f,
+				.top    = 144.0f,
+				.right  = PONG_MINW - 20.0f,
+				.bottom = 144.0f
+			},
+			(ID2D1Brush *)pong->dx.pGameOverBrush,
+			D2D1_DRAW_TEXT_OPTIONS_NONE,
+			DWRITE_MEASURING_MODE_NATURAL
+		);
+
+		uint32_t lScore = pong->logic.scoring.leftScore;
+		uint32_t rScore = pong->logic.scoring.rightScore;
+		uint32_t maxScore = (pong->logic.scoring.winnerIdx == 1) ? rScore : lScore;
+
+		wsprintfW(
+			temp,
+			L"%s wins with a score: %u",
+			(pong->logic.scoring.winnerIdx == 1) ? L"Right" : L"Left",
+			maxScore
+		);
+		dxRTDrawTextW(
+			(ID2D1RenderTarget *)pong->dx.pRT,
+			temp,
+			(UINT32)wcslen(temp),
+			pong->dx.consolas24CenteredBold,
+			(D2D1_RECT_F){
+				.left   = 20.0f,
+				.top    = 180.0f,
+				.right  = PONG_MINW - 20.0f,
+				.bottom = 180.0f
+			},
+			(ID2D1Brush *)pong->dx.pWinBrush,
+			D2D1_DRAW_TEXT_OPTIONS_NONE,
+			DWRITE_MEASURING_MODE_NATURAL
+		);
+
+		// Show instructions
+		const wchar_t instStr[] = L"Press 'ENTER' to start again.";
+
+		dxRTDrawTextW(
+			(ID2D1RenderTarget *)pong->dx.pRT,
+			instStr,
+			(sizeof(instStr) - 1) / sizeof(wchar_t),
+			pong->dx.consolas24CenteredBold,
+			(D2D1_RECT_F){
+				.left   = 20.0f,
+				.top    = 360.0f,
+				.right  = PONG_MINW - 20.0f,
+				.bottom = 360.0f
+			},
+			(ID2D1Brush *)pong->dx.pGameOverBrush,
+			D2D1_DRAW_TEXT_OPTIONS_NONE,
+			DWRITE_MEASURING_MODE_NATURAL
+		);
+	}
 
 	if (dxRTEndDraw((ID2D1RenderTarget *)pong->dx.pRT, NULL, NULL) == (HRESULT)D2DERR_RECREATE_TARGET)
 	{

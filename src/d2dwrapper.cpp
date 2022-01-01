@@ -223,6 +223,28 @@ void dxRTDrawLine(
 	This->DrawLine(point0, point1, brush, strokeWidth, strokeStyle);
 }
 
+void dxRTDrawTextW(
+	ID2D1RenderTarget * This,
+	const WCHAR * string,
+	UINT32 stringLen,
+	IUnknown * txtFmt,
+	D2D1_RECT_F layoutRect,
+	ID2D1Brush * fillBrush,
+	D2D1_DRAW_TEXT_OPTIONS options,
+	enum DWRITE_MEASURING_MODE measuringMode
+)
+{
+	This->DrawTextW(
+		string,
+		stringLen,
+		reinterpret_cast<IDWriteTextFormat *>(txtFmt),
+		layoutRect,
+		fillBrush,
+		options,
+		measuringMode
+	);
+}
+
 
 HRESULT dxHwndRTResize(ID2D1HwndRenderTarget * This, D2D1_SIZE_U sz)
 {

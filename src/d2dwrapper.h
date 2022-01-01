@@ -331,6 +331,31 @@ void dxRTDrawLine(
 );
 
 /**
+ * @brief Draws the specified text using the format provided by txtFmt
+ * 
+ * @param This Pointer to D2D render target object
+ * @param string A pointer to an array of Unicode characters to draw
+ * @param stringLen The number of characters in string
+ * @param txtFmt Pointer to DWrite IDWriteTextFormat object
+ * @param layoutRect The size and position of the area in which the text is drawn
+ * @param fillBrush The brush used to paint the text
+ * @param options A value that indicates whether the text should be snapped to pixel
+ * boundaries and whether the text should be clipped by the layoutRect
+ * @param measuringMode A value that indicates how glyph metrics are used to measure
+ * text when it is formatted
+ */
+void dxRTDrawTextW(
+	ID2D1RenderTarget * This,
+	const WCHAR * string,
+	UINT32 stringLen,
+	IUnknown * txtFmt,
+	D2D1_RECT_F layoutRect,
+	ID2D1Brush * fillBrush,
+	D2D1_DRAW_TEXT_OPTIONS options,
+	enum DWRITE_MEASURING_MODE measuringMode
+);
+
+/**
  * @brief Resizes D2D HWND render target
  * 
  * @param This Pointer to D2D HWND render target

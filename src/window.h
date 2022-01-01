@@ -27,10 +27,8 @@ typedef struct DxBoilerPlate
 
 	IUnknown * wFactory;
 
-	IUnknown * consolas16, * consolas16Centered;
-	ID2D1SolidColorBrush * pPauseBrush, * pGameOverBrush;
-
-	
+	IUnknown * consolas16, * consolas16Centered, * consolas24CenteredBold;
+	ID2D1SolidColorBrush * pPauseBrush, * pGameOverBrush, * pWinBrush;
 
 	// Asset creation flag
 	bool assetsCreated;

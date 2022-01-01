@@ -27,6 +27,7 @@ typedef struct Scoring
 
 	float time;
 	uint32_t leftScore, rightScore;
+	uint8_t winnerIdx;
 
 } Scoring_t;
 

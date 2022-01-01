@@ -4,13 +4,15 @@ const wchar_t * c_errorIds[PongErr_num_errs] = {
 	L"Unknown error occurred!",
 	L"Error registering window class!",
 	L"Error creating window!",
+	L"Error creating new thread!"
 	L"Error creating D2D factory!",
-	L"Error creating DWrite factory!",
 	L"Error creating D2D render target!",
 	L"Error creating D2D brush!",
 	L"Error creating D2D gradient!",
 	L"Error creating D2D geometry!",
-	L"Error creating new thread!"
+	L"Error creating DWrite factory!",
+	L"Error creating DWrite font!",
+	L"Error settings DWrite font alignment!"
 };
 
 PongErr_e g_pongLastError = PongErr_unknown;

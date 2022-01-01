@@ -9,13 +9,15 @@ typedef enum PongErr
 	PongErr_unknown,
 	PongErr_windowClass,
 	PongErr_window,
+	PongErr_thread,
 	PongErr_dxFactory,
-	PongErr_dwFactory,
 	PongErr_dxRT,
 	PongErr_dxBrush,
 	PongErr_dxGradient,
 	PongErr_dxGeo,
-	PongErr_thread,
+	PongErr_dwFactory,
+	PongErr_dwFont,
+	PongErr_dwFontAlignment,
 
 	PongErr_num_errs
 } PongErr_e;

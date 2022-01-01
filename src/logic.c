@@ -31,15 +31,15 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 		}
 
 		clock_t start = clock();
-		Sleep(20);
+		Sleep(16);
 		float delta = (float)(clock() - start) / (float)CLOCKS_PER_SEC;
 
-		logic->scoring.time += delta;
 
 		switch (logic->scoring.mode)
 		{
 		case GameMode_normal:
 		{
+			logic->scoring.time += delta;
 			// Create left & right pad geometries, ball geometry
 
 			PongLogic_calcAbsLeftPad(logic);
@@ -99,6 +99,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			}
 			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 			{
+				logic->scoring.winnerIdx = 1;
 				collides = true;
 			}
 
@@ -175,6 +176,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 				{
 					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
+					++logic->scoring.leftScore;
 					goto PongLogic_thread_release_rsc;
 				}
 
@@ -192,6 +194,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 				{
 					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
+					++logic->scoring.rightScore;
 					goto PongLogic_thread_release_rsc;
 				}
 			}
