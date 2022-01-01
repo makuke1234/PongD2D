@@ -91,6 +91,11 @@ bool PongWnd_createAssets(PongWnd_t * restrict pong)
 		return false;
 	}
 
+	// Create DirectWrite assets
+
+
+
+	// Create assets for game logic
 	if (PongLogic_createAssets(&pong->logic) == false)
 	{
 		return false;
@@ -146,7 +151,7 @@ bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs,
 		return false;
 	}
 
-	hr = dxDWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, &pong->dx.wFactory);
+	hr = dwDWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, &pong->dx.wFactory);
 	if (FAILED(hr))
 	{
 		g_pongLastError = PongErr_dwFactory;

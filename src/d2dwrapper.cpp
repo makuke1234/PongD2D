@@ -17,10 +17,6 @@ HRESULT dxD2D1CreateFactory(D2D1_FACTORY_TYPE type, void ** factory)
 	return ::D2D1CreateFactory(type, IID_ID2D1Factory, factory);
 }
 
-HRESULT dxDWriteCreateFactory(enum DWRITE_FACTORY_TYPE type, IUnknown ** factory)
-{
-	return ::DWriteCreateFactory(type, __uuidof(IDWriteFactory), factory);
-}
 
 HRESULT dxFactoryCreateHwndRenderTarget(
 	ID2D1Factory * This,

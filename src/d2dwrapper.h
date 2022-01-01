@@ -3,7 +3,6 @@
 
 #include <d2d1.h>
 #include <d2d1helper.h>
-#include <dwrite.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -26,14 +25,6 @@ void dxSafeRelease(IUnknown ** ppInstance);
  * @return HRESULT S_OK on success, otherwise error code
  */
 HRESULT dxD2D1CreateFactory(D2D1_FACTORY_TYPE type, void ** factory);
-/**
- * @brief Creates DirectWrite render factory
- * 
- * @param type Value that specifies whether the factory object will be shared or isolated
- * @param factory Address of a pointer to factory object
- * @return HRESULT S_OK on success, otherwise error code
- */
-HRESULT dxDWriteCreateFactory(enum DWRITE_FACTORY_TYPE type, IUnknown ** factory);
 
 /**
  * @brief Creates HWND render target

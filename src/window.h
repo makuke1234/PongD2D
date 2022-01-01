@@ -3,6 +3,7 @@
 
 #include "winapi.h"
 #include "d2dwrapper.h"
+#include "dwritewrapper.h"
 #include "logic.h"
 #include <stdbool.h>
 
@@ -10,8 +11,9 @@ extern bool g_pongClassRegistered;
 
 typedef struct DxBoilerPlate
 {
+	// Direct2D
+
 	ID2D1Factory * factory;
-	IUnknown * wFactory;
 
 	ID2D1HwndRenderTarget * pRT;
 
@@ -21,6 +23,16 @@ typedef struct DxBoilerPlate
 	ID2D1GradientStopCollection * pGradStops;
 	ID2D1RadialGradientBrush * pBallBrush;
 
+	// DirectWrite
+
+	IUnknown * wFactory;
+
+	IUnknown * consolas16, * consolas16Centered;
+	ID2D1SolidColorBrush * pPauseBrush, * pGameOverBrush;
+
+	
+
+	// Asset creation flag
 	bool assetsCreated;
 
 } DxBoilerPlate_t;
