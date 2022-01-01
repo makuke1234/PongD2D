@@ -213,8 +213,8 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			float dx = delta * vx;
 			float dy = delta * vy;
 
-			logic->scoring.absBall.x += dx;
-			logic->scoring.absBall.y += dy;
+			logic->scoring.absBall.x = clamp(logic->scoring.absBall.x + dx, PONG_BALL_X, PONG_MINW - PONG_BALL_X);
+			logic->scoring.absBall.y = clamp(logic->scoring.absBall.y + dy, PONG_BALL_Y, PONG_MINH - PONG_BALL_Y);
 
 			break;
 		}
