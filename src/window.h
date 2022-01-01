@@ -89,9 +89,37 @@ int PongWnd_msgLoop(const PongWnd_t * pong);
  */
 void PongWnd_free(PongWnd_t * restrict pong);
 
+/**
+ * @brief Convert horizontal length from device-independent pixels to real pixels
+ * 
+ * @param pong Pointer to PongWnd_t structure
+ * @param x device-independent length
+ * @return FLOAT real length
+ */
 FLOAT PongWnd_dipx(const PongWnd_t * restrict pong, FLOAT x);
+/**
+ * @brief Convert vertical length from device-independent pixels to real pixels
+ * 
+ * @param pong Pointer to PongWnd_t structure
+ * @param y device-independent length
+ * @return FLOAT real length
+ */
 FLOAT PongWnd_dipy(const PongWnd_t * restrict pong, FLOAT y);
+/**
+ * @brief Convert horizontal length from real pixels to device-independent pixels
+ * 
+ * @param pong Pointer to PongWnd_t structure
+ * @param x real length
+ * @return FLOAT device-independent length
+ */
 FLOAT PongWnd_dpix(const PongWnd_t * restrict pong, FLOAT x);
+/**
+ * @brief Convert vertical length from real pixels to device-independent pixels
+ * 
+ * @param pong Pointer to PongWnd_t structure
+ * @param y real length
+ * @return FLOAT device-independent length
+ */
 FLOAT PongWnd_dpiy(const PongWnd_t * restrict pong, FLOAT y);
 
 /**
