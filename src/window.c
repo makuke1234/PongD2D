@@ -831,29 +831,6 @@ void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 		}
 		break;
 	}
-
-	if (pong->logic.scoring.notPaused)
-	{
-		switch (wp)
-		{
-		// Left pad up
-		case L'W':
-			pong->logic.scoring.relLeftPad = clamp(pong->logic.scoring.relLeftPad - 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
-			break;
-		// Left pad down
-		case L'S':
-			pong->logic.scoring.relLeftPad = clamp(pong->logic.scoring.relLeftPad + 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
-			break;
-		// Right pad up
-		case VK_UP:
-			pong->logic.scoring.relRightPad = clamp(pong->logic.scoring.relRightPad - 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
-			break;
-		// Right pad down
-		case VK_DOWN:
-			pong->logic.scoring.relRightPad = clamp(pong->logic.scoring.relRightPad + 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
-			break;
-		}
-	}
 }
 void PongWnd_onKeyRelease(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 {

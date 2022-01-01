@@ -39,6 +39,28 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 		{
 		case GameMode_normal:
 		{
+			// Left pad up
+			if (GetAsyncKeyState(L'W') & 0x8000)
+			{
+				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad - 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+			}
+			// Left pad down
+			else if (GetAsyncKeyState('S') & 0x8000)
+			{
+				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad + 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+			}
+			// Right pad up
+			if (GetAsyncKeyState(VK_UP) & 0x8000)
+			{
+				logic->scoring.relRightPad = clamp(logic->scoring.relRightPad - 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+			}
+			// Right pad down
+			else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+			{
+				logic->scoring.relRightPad = clamp(logic->scoring.relRightPad + 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+			}
+
+
 			logic->scoring.time += delta;
 			// Create left & right pad geometries, ball geometry
 
