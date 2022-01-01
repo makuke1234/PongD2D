@@ -42,7 +42,7 @@ typedef struct PongLogic
 	bool assetsCreated;
 
 	Scoring_t scoring;
-	bool requestReset;
+	volatile bool requestReset;
 
 	HANDLE logicThread;
 	bool killThreadFlag;
