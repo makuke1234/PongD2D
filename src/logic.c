@@ -3,6 +3,8 @@
 #include "pongerr.h"
 
 #include <time.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 DWORD WINAPI PongLogic_thread(LPVOID param)
 {
@@ -33,12 +35,10 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 
 			PongLogic_calcAbsLeftPad(logic);
 			PongLogic_calcAbsRightPad(logic);
-			PongLogic_calcAbsBall(logic);
 
 			ID2D1RectangleGeometry * plPadGeo, * prPadGeo;
 			ID2D1EllipseGeometry * pBallGeo;
 
-			bool failed = false;
 			HRESULT hr = dxFactoryCreateRectangleGeometry(
 				logic->pong->dx.factory,
 				logic->scoring.absLeftPad,
@@ -46,7 +46,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			);
 			if (FAILED(hr))
 			{
-				failed = true;
+				goto PongLogic_thread_release_rsc;
 			}
 
 			hr = dxFactoryCreateRectangleGeometry(
@@ -56,7 +56,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			);
 			if (FAILED(hr))
 			{
-				failed = true;
+				goto PongLogic_thread_release_rsc;
 			}
 
 			hr = dxFactoryCreateEllipseGeometry(
@@ -70,15 +70,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			);
 			if (FAILED(hr))
 			{
-				failed = true;
-			}
-
-			if (failed == true)
-			{
-				dxSafeRelease((IUnknown **)&plPadGeo);
-				dxSafeRelease((IUnknown **)&prPadGeo);
-				dxSafeRelease((IUnknown **)pBallGeo);
-				break;
+				goto PongLogic_thread_release_rsc;
 			}
 
 			// Check for "bad" collisions
@@ -94,15 +86,14 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			);
 			if (FAILED(hr))
 			{
-				failed = true;
+				goto PongLogic_thread_release_rsc;
 			}
-
-			if (failed == false && geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 			{
 				collides = true;
 			}
 
-			if (failed == false && !collides)
+			if (!collides)
 			{
 				hr = dxGeoCompareWithGeometry(
 					(ID2D1Geometry *)pBallGeo,
@@ -112,7 +103,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				);
 				if (FAILED(hr))
 				{
-					failed = true;
+					goto PongLogic_thread_release_rsc;
 				}
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 				{
@@ -124,18 +115,115 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			{
 				logic->scoring.mode = GameMode_gameOver;
 			}
-
-			if (collides || failed)
-			{
-				dxSafeRelease((IUnknown **)&plPadGeo);
-				dxSafeRelease((IUnknown **)&prPadGeo);
-				dxSafeRelease((IUnknown **)&pBallGeo);
-				break;
-			}
-			
 			// If no "bad" collisions, check for "good"
+			else
+			{
+				// If ball bounces off roof
+				hr = dxGeoCompareWithGeometry(
+					(ID2D1Geometry *)pBallGeo,
+					(ID2D1Geometry *)logic->pUpWallGeo,
+					NULL,
+					&geoRel
+				);
+				if (FAILED(hr))
+				{
+					goto PongLogic_thread_release_rsc;
+				}
+				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+				{
+					collides = true;
+				}
+
+				if (collides)
+				{
+					logic->scoring.ballAngle = -logic->scoring.ballAngle;	// -angle
+					goto PongLogic_thread_release_rsc;
+				}
+
+				// If ball bounces off floor
+				hr = dxGeoCompareWithGeometry(
+					(ID2D1Geometry *)pBallGeo,
+					(ID2D1Geometry *)logic->pDownWallGeo,
+					NULL,
+					&geoRel
+				);
+				if (FAILED(hr))
+				{
+					goto PongLogic_thread_release_rsc;
+				}
+				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+				{
+					collides = true;
+				}
 
 
+				if (collides)
+				{
+					logic->scoring.ballAngle = -logic->scoring.ballAngle;
+					goto PongLogic_thread_release_rsc;
+				}
+
+				// If ball bounces off left pad
+				hr = dxGeoCompareWithGeometry(
+					(ID2D1Geometry *)pBallGeo,
+					(ID2D1Geometry *)plPadGeo,
+					NULL,
+					&geoRel
+				);
+				if (FAILED(hr))
+				{
+					goto PongLogic_thread_release_rsc;
+				}
+				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+				{
+					collides = true;
+				}
+
+				if (collides)
+				{
+					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
+					goto PongLogic_thread_release_rsc;
+				}
+
+				// If ball bounces of right pad
+				hr = dxGeoCompareWithGeometry(
+					(ID2D1Geometry *)pBallGeo,
+					(ID2D1Geometry *)prPadGeo,
+					NULL,
+					&geoRel
+				);
+				if (FAILED(hr))
+				{
+					goto PongLogic_thread_release_rsc;
+				}
+				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+				{
+					collides = true;
+				}
+
+				if (collides)
+				{
+					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
+					goto PongLogic_thread_release_rsc;
+				}
+			}
+
+		PongLogic_thread_release_rsc: ;
+			// Release resources
+			dxSafeRelease((IUnknown **)&plPadGeo);
+			dxSafeRelease((IUnknown **)&prPadGeo);
+			dxSafeRelease((IUnknown **)&pBallGeo);
+
+			// Move ball in direction given to it
+
+			float vx =  PONG_BALL_VELOCITY * cosf(logic->scoring.ballAngle);
+			float vy = -PONG_BALL_VELOCITY * sinf(logic->scoring.ballAngle);
+
+			float dx = delta * vx;
+			float dy = delta * vy;
+
+			logic->scoring.absBall.x += dx;
+			logic->scoring.absBall.y += dy;
 
 			break;
 		}
@@ -341,6 +429,7 @@ void PongLogic_reset(PongLogic_t * restrict logic)
 
 	// Reset scoring
 	logic->scoring = (Scoring_t){ 0 };
+	logic->scoring.ballAngle = (float)M_PI / 4.0f; // 45 degrees
 
 	PongLogic_calcAbsLeftPad(logic);
 	PongLogic_calcAbsRightPad(logic);
