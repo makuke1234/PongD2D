@@ -165,9 +165,7 @@ bool PongLogic_create(PongLogic_t * restrict logic, PongWnd_t * pong)
 	*logic = (PongLogic_t){ 0 };
 	logic->pong = pong;
 
-	PongLogic_calcAbsLeftPad(logic);
-	PongLogic_calcAbsRightPad(logic);
-	PongLogic_calcAbsBall(logic);
+	PongLogic_reset(logic);
 
 	// try to create thread
 	logic->logicThread = CreateThread(
@@ -343,6 +341,10 @@ void PongLogic_reset(PongLogic_t * restrict logic)
 
 	// Reset scoring
 	logic->scoring = (Scoring_t){ 0 };
+
+	PongLogic_calcAbsLeftPad(logic);
+	PongLogic_calcAbsRightPad(logic);
+	PongLogic_calcAbsBall(logic);
 
 	// Update screen
 	InvalidateRect(logic->pong->hwnd, NULL, FALSE);
