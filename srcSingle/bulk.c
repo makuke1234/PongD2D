@@ -1,1 +1,5 @@
+#include "../src/logic.c"
 #include "../src/main.c"
+#include "../src/pongerr.c"
+#include "../src/winapi.c"
+#include "../src/window.c"
