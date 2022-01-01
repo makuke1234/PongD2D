@@ -6,17 +6,17 @@
 #define PONG_CLASSNAME	L"PongD2DClass"
 #define PONG_APPNAME	L"PongD2D"
 
-#define PONG_MINW 640.0f
-#define PONG_MINH 480.0f
+#define PONG_MINW 1024.0f
+#define PONG_MINH 600.0f
 
 #define PONG_BALL_X 15.0f
 #define PONG_BALL_Y 15.0f
 
 // Ball velocity in DIPs (device-independent pixels) per second
-#define PONG_BALL_VELOCITY 100.0f
+#define PONG_BALL_VELOCITY 300.0f
 
 #define PONG_WALL_X 10.0f
-#define PONG_WALL_Y 60.0f
+#define PONG_WALL_Y 80.0f
 
 #define PONG_WALL_MAX ((PONG_MINH - PONG_WALL_Y) / 2.0f)
 

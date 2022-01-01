@@ -131,11 +131,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				}
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 				{
-					collides = true;
-				}
-
-				if (collides)
-				{
 					logic->scoring.ballAngle = -logic->scoring.ballAngle;	// -angle
 					goto PongLogic_thread_release_rsc;
 				}
@@ -152,12 +147,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 					goto PongLogic_thread_release_rsc;
 				}
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
-				{
-					collides = true;
-				}
-
-
-				if (collides)
 				{
 					logic->scoring.ballAngle = -logic->scoring.ballAngle;
 					goto PongLogic_thread_release_rsc;
@@ -176,11 +165,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				}
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 				{
-					collides = true;
-				}
-
-				if (collides)
-				{
 					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
 					goto PongLogic_thread_release_rsc;
 				}
@@ -197,11 +181,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 					goto PongLogic_thread_release_rsc;
 				}
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
-				{
-					collides = true;
-				}
-
-				if (collides)
 				{
 					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
 					goto PongLogic_thread_release_rsc;
