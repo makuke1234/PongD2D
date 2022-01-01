@@ -821,7 +821,6 @@ void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 		if (pong->logic.scoring.mode == GameMode_normal)
 		{
 			pong->logic.scoring.notPaused ^= 1;
-			InvalidateRect(pong->hwnd, NULL, FALSE);
 		}
 		break;
 	case VK_RETURN:
