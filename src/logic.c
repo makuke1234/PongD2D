@@ -36,29 +36,31 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			continue;
 		}
 
+
 		switch (logic->scoring.mode)
 		{
 		case GameMode_normal:
 		{
+			float dxWall = PONG_WALL_VELOCITY * delta;
 			// Left pad up
 			if (GetAsyncKeyState(L'W') & 0x8000)
 			{
-				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad - 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad - dxWall, -PONG_WALL_MAX, PONG_WALL_MAX);
 			}
 			// Left pad down
 			else if (GetAsyncKeyState('S') & 0x8000)
 			{
-				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad + 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad + dxWall, -PONG_WALL_MAX, PONG_WALL_MAX);
 			}
 			// Right pad up
 			if (GetAsyncKeyState(VK_UP) & 0x8000)
 			{
-				logic->scoring.relRightPad = clamp(logic->scoring.relRightPad - 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+				logic->scoring.relRightPad = clamp(logic->scoring.relRightPad - dxWall, -PONG_WALL_MAX, PONG_WALL_MAX);
 			}
 			// Right pad down
 			else if (GetAsyncKeyState(VK_DOWN) & 0x8000)
 			{
-				logic->scoring.relRightPad = clamp(logic->scoring.relRightPad + 10.0f, -PONG_WALL_MAX, PONG_WALL_MAX);
+				logic->scoring.relRightPad = clamp(logic->scoring.relRightPad + dxWall, -PONG_WALL_MAX, PONG_WALL_MAX);
 			}
 
 

@@ -14,11 +14,15 @@
 
 // Ball velocity in DIPs (device-independent pixels) per second
 #define PONG_BALL_VELOCITY 300.0f
+#define PONG_WALL_VELOCITY 300.0f
 
 #define PONG_WALL_X 10.0f
 #define PONG_WALL_Y 80.0f
 
 #define PONG_WALL_MAX ((PONG_MINH - PONG_WALL_Y) / 2.0f)
+
+#define VERSION_STR "1.1.1"
+#define VERSION_SEQ 1,1,1
 
 
 #endif

@@ -26,6 +26,9 @@ Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/
 
 # Changelog
 
+* 1.1.1
+	* Paddle movement speed is no longer affected by the frame rate
+
 * 1.1.0
 	* Move to a more responsive graphics approach.<br>
 	*Kudos to [Creel](https://www.youtube.com/channel/UCq7dxy_qYNEBcHqQVCbc20w), his [video](https://www.youtube.com/watch?v=Rv0esscpAcQ) on D2D real-time game loops.*
