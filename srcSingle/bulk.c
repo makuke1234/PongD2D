@@ -3,3 +3,4 @@
 #include "../src/pongerr.c"
 #include "../src/winapi.c"
 #include "../src/window.c"
+#include "../src/random.c"
