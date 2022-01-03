@@ -21,6 +21,22 @@ Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/
 | Up     | Move right wall up   |
 | Down   | Move right wall down |
 | Escape | Pause/unpause        |
+| Enter  | Restart game         |
+
+
+# Changelog
+
+* 1.1.0
+	* Move to a more responsive graphics approach
+	*Kudos to [Creel](https://www.youtube.com/channel/UCq7dxy_qYNEBcHqQVCbc20w), his [video](https://www.youtube.com/watch?v=Rv0esscpAcQ) on D2D real-time game loops.*
+
+	* Keyboard response is better too, raised new issue, keyboard response is tied to framerate
+
+* 1.0.1
+	* Smoother paddle operation / better keyboard response
+
+* 0.9.1
+	* Fix bug when compiling for release mode, add `volatile` to an important variable
 
 
 # License
