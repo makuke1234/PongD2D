@@ -1,6 +1,6 @@
 # PongD2D
 
-![Release version](https://img.shields.io/badge/release-v1.2.0-red.svg)
+![Release version](https://img.shields.io/badge/release-v1.2.0-green.svg)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
