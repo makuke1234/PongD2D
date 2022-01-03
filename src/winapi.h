@@ -48,5 +48,12 @@ bool w32_regClass(
 	HBRUSH backBrush
 );
 
+/**
+ * @brief Get time in microsecond accuracy
+ * 
+ * @return LARGE_INTEGER Win32 time structure
+ */
+LARGE_INTEGER w32_getTime();
+
 
 #endif

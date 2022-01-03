@@ -91,7 +91,7 @@ const wchar_t * PongWnd_getTitle(const PongWnd_t * restrict pong);
  * @param pong Pointer to PongWnd_t structure
  * @return int wParam of last message
  */
-int PongWnd_msgLoop(const PongWnd_t * pong);
+int PongWnd_msgLoop(PongWnd_t * pong);
 /**
  * @brief Frees resources owned by PongWnd_t object
  * 

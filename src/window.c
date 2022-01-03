@@ -362,19 +362,37 @@ const wchar_t * PongWnd_getTitle(const PongWnd_t * restrict pong)
 		return pong->wndTitle;
 	}
 }
-int PongWnd_msgLoop(const PongWnd_t * pong)
+int PongWnd_msgLoop(PongWnd_t * pong)
 {
-	MSG msg;
-	BOOL br;
-	while ((br = GetMessageW(&msg, NULL, 0, 0)) != 0)
+	MSG msg = { 0 };
+	while (msg.message != WM_QUIT)
 	{
-		if (br == -1)
+		BOOL br;
+		if ((br = PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) != 0)
 		{
-			pongErr(pong, PongErr_unknown);
-			return -1;
+			if (br == -1)
+			{
+				pongErr(pong, PongErr_unknown);
+				return -1;
+			}
+			//TranslateMessage(&msg);
+			DispatchMessageW(&msg);
 		}
-		TranslateMessage(&msg);
-		DispatchMessageW(&msg);
+		else
+		{
+			// render
+			static LARGE_INTEGER start = { 0 };
+			PongWnd_onRender(pong);
+			
+			LARGE_INTEGER stop;
+			QueryPerformanceCounter(&stop);
+			pong->logic.timing.frameTime = (float)(stop.QuadPart - start.QuadPart) / (float)10000000;
+
+			// Notify game logic thread to calculate next frame's movement in time
+			WakeConditionVariable(&pong->logic.timing.cv);
+
+			start = stop;
+		}
 	}
 
 	return (int)msg.wParam;
@@ -451,8 +469,18 @@ LRESULT PongWnd_winProc(PongWnd_t * pong, HWND hwnd, UINT msg, WPARAM wp, LPARAM
 	switch (msg)
 	{
 	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+		consciousUnused(hdc);
+		
+		// Direct2D rendering
 		PongWnd_onRender(pong);
+
+
+		EndPaint(hwnd, &ps);
 		break;
+	}
 	case WM_KEYDOWN:
 		PongWnd_onKeyPress(pong, wp, lp);
 		break;
@@ -491,10 +519,6 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	{
 		return;
 	}
-
-	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(pong->hwnd, &ps);
-	consciousUnused(hdc);
 
 	dxRTBeginDraw((ID2D1RenderTarget *)pong->dx.pRT);
 	dxRTSetTransform((ID2D1RenderTarget *)pong->dx.pRT, dxD2D1Matrix3x2FIdentity());
@@ -726,8 +750,6 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	{
 		PongWnd_freeAssets(pong);
 	}
-
-	EndPaint(pong->hwnd, &ps);
 }
 void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp)
 {

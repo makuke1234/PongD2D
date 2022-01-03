@@ -5,8 +5,8 @@ ASMC=nasm
 CDEFFLAGS=-std=c2x -Wall -Wextra -Wpedantic -Wconversion -m64 -D UNICODE -D _UNICODE
 CXXDEFFLAGS=-std=c++20 -Wall -Wextra -Wpedantic -Wconversion -m64 -D UNICODE -D _UNICODE
 CDEBFLAGS=-g -O0 -D _DEBUG
-CFLAGS=-O3 -Wl,--strip-all,--build-id=none,--gc-sections -fno-ident -D NDEBUG
-LIB=-municode -lgdi32 -ld2d1 -ldwrite -luuid -mwindows
+CFLAGS=-O3 -Wl,--strip-all,--build-id=none,--gc-sections -fno-ident -D NDEBUG -mwindows
+LIB=-municode -lgdi32 -ld2d1 -ldwrite -luuid
 
 SRC=src
 SRC_SINGLE=srcSingle

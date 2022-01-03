@@ -31,6 +31,17 @@ typedef struct Scoring
 
 } Scoring_t;
 
+typedef struct Timing
+{
+	float frameTime;
+	CRITICAL_SECTION crit;
+	CONDITION_VARIABLE cv;
+
+	CRITICAL_SECTION critR;
+	CONDITION_VARIABLE cvR;
+
+} Timing_t;
+
 struct PongWnd;
 
 typedef struct PongLogic
@@ -43,6 +54,7 @@ typedef struct PongLogic
 
 	Scoring_t scoring;
 	volatile bool requestReset;
+	Timing_t timing;
 
 	HANDLE logicThread;
 	bool killThreadFlag;

@@ -19,3 +19,16 @@ bool w32_regClass(
 
 	return RegisterClassExW(&wc) != 0;
 }
+
+LARGE_INTEGER w32_getTime()
+{
+	LARGE_INTEGER time;
+	if (QueryPerformanceCounter(&time) == FALSE)
+	{
+		return (LARGE_INTEGER){ 0 };
+	}
+	else
+	{
+		return time;
+	}
+}

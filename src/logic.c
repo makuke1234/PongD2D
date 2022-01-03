@@ -2,7 +2,6 @@
 #include "resource.h"
 #include "pongerr.h"
 
-#include <time.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -12,28 +11,30 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 
 	while (logic->killThreadFlag == false)
 	{
+		// Wait for time to come over
+		EnterCriticalSection(&logic->timing.crit);
+
+		SleepConditionVariableCS(&logic->timing.cv, &logic->timing.crit, INFINITE);
+		float delta = logic->timing.frameTime;
+
+		LeaveCriticalSection(&logic->timing.crit);
+
+
 		if (logic->requestReset)
 		{
 			logic->requestReset = false;
-			// Spin-loop waiting
-			while (!logic->requestReset);
+			EnterCriticalSection(&logic->timing.critR);
 
-			logic->requestReset = false;
+			WakeConditionVariable(&logic->timing.cvR);
+			SleepConditionVariableCS(&logic->timing.cvR, &logic->timing.critR, INFINITE);
+
+			LeaveCriticalSection(&logic->timing.critR);
 		}
 
-		while (!logic->scoring.notPaused && !logic->requestReset)
+		if (!logic->scoring.notPaused)
 		{
-			Sleep(20);
-			if (logic->killThreadFlag)
-			{
-				goto PongLogic_thread_finish;
-			}
+			continue;
 		}
-
-		clock_t start = clock();
-		Sleep(16);
-		float delta = (float)(clock() - start) / (float)CLOCKS_PER_SEC;
-
 
 		switch (logic->scoring.mode)
 		{
@@ -243,17 +244,11 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			break;
 		}
 		case GameMode_gameOver:
-		{
-
 			break;
 		}
-		}
 
-		// Update screen
-		InvalidateRect(logic->pong->hwnd, NULL, FALSE);
+		// Screen will be updated automatically
 	}
-
-PongLogic_thread_finish: ;
 
 	logic->logicThread = NULL;
 	return 0;
@@ -270,6 +265,13 @@ bool PongLogic_create(PongLogic_t * restrict logic, PongWnd_t * pong)
 	logic->pong = pong;
 
 	PongLogic_reset(logic);
+
+	// Create critical section and condition variable
+	InitializeCriticalSection(&logic->timing.crit);
+	InitializeConditionVariable(&logic->timing.cv);
+
+	InitializeCriticalSection(&logic->timing.critR);
+	InitializeConditionVariable(&logic->timing.cvR);
 
 	// try to create thread
 	logic->logicThread = CreateThread(
@@ -299,8 +301,13 @@ void PongLogic_free(PongLogic_t * restrict logic)
 	if (logic->logicThread != NULL)
 	{
 		logic->killThreadFlag = true;
+		WakeConditionVariable(&logic->timing.cv);
 		WaitForSingleObject(logic->logicThread, INFINITE);
 	}
+
+	// Delete critical section
+	DeleteCriticalSection(&logic->timing.crit);
+	DeleteCriticalSection(&logic->timing.critR);
 
 	PongLogic_freeAssets(logic);
 }
@@ -445,9 +452,11 @@ void PongLogic_reset(PongLogic_t * logic)
 
 	if (logic->logicThread != NULL)
 	{
+		EnterCriticalSection(&logic->timing.critR);
 		logic->requestReset = true;
-		// Do nothing smart
-		while (logic->requestReset);
+		WakeConditionVariable(&logic->timing.cv);
+
+		SleepConditionVariableCS(&logic->timing.cvR, &logic->timing.critR, INFINITE);
 	}
 
 	// Reset scoring
@@ -460,8 +469,8 @@ void PongLogic_reset(PongLogic_t * logic)
 
 	if (logic->logicThread != NULL)
 	{
-		logic->requestReset = true;
-		while (logic->requestReset);
+		LeaveCriticalSection(&logic->timing.critR);
+		WakeConditionVariable(&logic->timing.cvR);
 	}
 }
 
