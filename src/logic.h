@@ -3,6 +3,7 @@
 
 #include "winapi.h"
 #include "d2dwrapper.h"
+#include "random.h"
 
 #include <stdint.h>
 
@@ -17,10 +18,12 @@ typedef struct Scoring
 {
 	float relLeftPad, relRightPad;
 
+	float relLeftPadPrev, relRightPadPrev;
+
 	D2D1_RECT_F absLeftPad, absRightPad;
 	D2D1_POINT_2F absBall;
 
-	float ballAngle;
+	float ballAngle, ballSpeed;
 
 	GameMode_e mode;
 	bool notPaused;
@@ -46,6 +49,8 @@ struct PongWnd;
 
 typedef struct PongLogic
 {
+	PongRng_t rng;
+
 	struct PongWnd * pong;
 	ID2D1RectangleGeometry * pUpWallGeo, * pDownWallGeo;
 	ID2D1RectangleGeometry * pLeftWallGeo, * pRightWallGeo;

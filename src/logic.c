@@ -2,6 +2,7 @@
 #include "resource.h"
 #include "pongerr.h"
 
+#include <time.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -41,14 +42,40 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 		{
 		case GameMode_normal:
 		{
-			float dxWall = PONG_WALL_VELOCITY * delta;
+			// Always keep positive angle
+			if (logic->scoring.ballAngle < 0.0f)
+			{
+				logic->scoring.ballAngle += (float)M_PI * 2.0f;
+			}
+
+			if (logic->scoring.ballAngle > (float)M_PI * 1.5f)
+			{
+				logic->scoring.ballAngle = clamp(logic->scoring.ballAngle, 1.75f * (float)M_PI, 2.0f * (float)M_PI);
+			}
+			else if (logic->scoring.ballAngle > (float)M_PI)
+			{
+				logic->scoring.ballAngle = clamp(logic->scoring.ballAngle, (float)M_PI, 1.25f * (float)M_PI);
+			}
+			else if (logic->scoring.ballAngle > (float)M_PI * 0.5f)
+			{
+				logic->scoring.ballAngle = clamp(logic->scoring.ballAngle, (float)M_PI * 0.75f, (float)M_PI);
+			}
+			else
+			{
+				logic->scoring.ballAngle = clamp(logic->scoring.ballAngle, 0.0f, (float)M_PI * 0.25f);
+			}
+
+			float dxWall = 0.9f * logic->scoring.ballSpeed * delta;
+			logic->scoring.relLeftPadPrev  = logic->scoring.relLeftPadPrev;
+			logic->scoring.relRightPadPrev = logic->scoring.relRightPadPrev;
+			
 			// Left pad up
 			if (GetAsyncKeyState(L'W') & 0x8000)
 			{
 				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad - dxWall, -PONG_WALL_MAX, PONG_WALL_MAX);
 			}
 			// Left pad down
-			else if (GetAsyncKeyState('S') & 0x8000)
+			else if (GetAsyncKeyState(L'S') & 0x8000)
 			{
 				logic->scoring.relLeftPad = clamp(logic->scoring.relLeftPad + dxWall, -PONG_WALL_MAX, PONG_WALL_MAX);
 			}
@@ -72,8 +99,8 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 
 			// Move ball in direction given to it
 
-			float vx =  PONG_BALL_VELOCITY * cosf(logic->scoring.ballAngle);
-			float vy = -PONG_BALL_VELOCITY * sinf(logic->scoring.ballAngle);
+			float vx =  logic->scoring.ballSpeed * cosf(logic->scoring.ballAngle);
+			float vy = -logic->scoring.ballSpeed * sinf(logic->scoring.ballAngle);
 
 			float dx = delta * vx;
 			float dy = delta * vy;
@@ -122,6 +149,102 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			bool collides = false;
 
 			D2D1_GEOMETRY_RELATION geoRel;
+			
+			// If no "bad" collisions, check for "good"
+			// If ball bounces off roof
+			hr = dxGeoCompareWithGeometry(
+				(ID2D1Geometry *)pBallGeo,
+				(ID2D1Geometry *)logic->pUpWallGeo,
+				NULL,
+				&geoRel
+			);
+			if (FAILED(hr))
+			{
+				goto PongLogic_thread_release_rsc;
+			}
+			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+			{
+				logic->scoring.ballAngle = -logic->scoring.ballAngle;	// -angle
+				goto PongLogic_thread_release_rsc;
+			}
+
+			// If ball bounces off floor
+			hr = dxGeoCompareWithGeometry(
+				(ID2D1Geometry *)pBallGeo,
+				(ID2D1Geometry *)logic->pDownWallGeo,
+				NULL,
+				&geoRel
+			);
+			if (FAILED(hr))
+			{
+				goto PongLogic_thread_release_rsc;
+			}
+			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+			{
+				logic->scoring.ballAngle = -logic->scoring.ballAngle;
+				goto PongLogic_thread_release_rsc;
+			}
+
+			// If ball bounces off left pad
+			hr = dxGeoCompareWithGeometry(
+				(ID2D1Geometry *)pBallGeo,
+				(ID2D1Geometry *)plPadGeo,
+				NULL,
+				&geoRel
+			);
+			if (FAILED(hr))
+			{
+				goto PongLogic_thread_release_rsc;
+			}
+			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+			{
+				logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
+				++logic->scoring.leftScore;
+				float percentAngle = logic->scoring.absBall.x;
+				logic->scoring.absBall.x = PONG_WALL_X + PONG_BALL_X;
+				percentAngle = clamp(fabsf(logic->scoring.absBall.x - percentAngle) / PONG_BALL_X, 0.0f, 0.75f);
+
+				float paddleSpeed = (logic->scoring.relLeftPad - logic->scoring.relLeftPadPrev) / delta;
+
+				logic->scoring.ballAngle += (PongRng_rand_normf(&logic->rng, 10000) * 2.0f - 1.0f) * (float)M_PI / 6.0f;
+
+				logic->scoring.ballSpeed = fabsf(logic->scoring.ballSpeed + percentAngle * paddleSpeed * (PongRng_rand_normf(&logic->rng, 10000) * 2.0f - 1.0f));
+
+				goto PongLogic_thread_release_rsc;
+			}
+
+			// If ball bounces of right pad
+			hr = dxGeoCompareWithGeometry(
+				(ID2D1Geometry *)pBallGeo,
+				(ID2D1Geometry *)prPadGeo,
+				NULL,
+				&geoRel
+			);
+			if (FAILED(hr))
+			{
+				goto PongLogic_thread_release_rsc;
+			}
+			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
+			{
+				logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
+				++logic->scoring.rightScore;
+				float percentAngle = logic->scoring.absBall.x;
+				logic->scoring.absBall.x = PONG_MINW - (PONG_WALL_X + PONG_BALL_X);
+				percentAngle = clamp(fabsf(logic->scoring.absBall.x - percentAngle) / PONG_BALL_X, 0.0f, 0.75f);
+
+				// Calculate moving speed of right paddle
+				float paddleSpeed = (logic->scoring.relRightPad - logic->scoring.relRightPadPrev) / delta;
+
+				logic->scoring.ballAngle += (PongRng_rand_normf(&logic->rng, 10000) * 2.0f - 1.0f) * (float)M_PI / 6.0f;
+
+				logic->scoring.ballSpeed = fabsf(logic->scoring.ballSpeed + percentAngle * paddleSpeed * (PongRng_rand_normf(&logic->rng, 10000) * 2.0f - 1.0f));
+
+				goto PongLogic_thread_release_rsc;
+			}
+
+			logic->scoring.ballSpeed = clamp(logic->scoring.ballSpeed, 0.75f * PONG_BALL_VELOCITY, 2.5f * PONG_BALL_VELOCITY);
+
+			// If no "good" collisions, check for "bad"
 
 			hr = dxGeoCompareWithGeometry(
 				(ID2D1Geometry *)pBallGeo,
@@ -161,81 +284,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			{
 				logic->scoring.mode = GameMode_gameOver;
 			}
-			// If no "bad" collisions, check for "good"
-			else
-			{
-				// If ball bounces off roof
-				hr = dxGeoCompareWithGeometry(
-					(ID2D1Geometry *)pBallGeo,
-					(ID2D1Geometry *)logic->pUpWallGeo,
-					NULL,
-					&geoRel
-				);
-				if (FAILED(hr))
-				{
-					goto PongLogic_thread_release_rsc;
-				}
-				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
-				{
-					logic->scoring.ballAngle = -logic->scoring.ballAngle;	// -angle
-					goto PongLogic_thread_release_rsc;
-				}
-
-				// If ball bounces off floor
-				hr = dxGeoCompareWithGeometry(
-					(ID2D1Geometry *)pBallGeo,
-					(ID2D1Geometry *)logic->pDownWallGeo,
-					NULL,
-					&geoRel
-				);
-				if (FAILED(hr))
-				{
-					goto PongLogic_thread_release_rsc;
-				}
-				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
-				{
-					logic->scoring.ballAngle = -logic->scoring.ballAngle;
-					goto PongLogic_thread_release_rsc;
-				}
-
-				// If ball bounces off left pad
-				hr = dxGeoCompareWithGeometry(
-					(ID2D1Geometry *)pBallGeo,
-					(ID2D1Geometry *)plPadGeo,
-					NULL,
-					&geoRel
-				);
-				if (FAILED(hr))
-				{
-					goto PongLogic_thread_release_rsc;
-				}
-				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
-				{
-					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
-					++logic->scoring.leftScore;
-					logic->scoring.absBall.x = PONG_WALL_X + PONG_BALL_X;
-					goto PongLogic_thread_release_rsc;
-				}
-
-				// If ball bounces of right pad
-				hr = dxGeoCompareWithGeometry(
-					(ID2D1Geometry *)pBallGeo,
-					(ID2D1Geometry *)prPadGeo,
-					NULL,
-					&geoRel
-				);
-				if (FAILED(hr))
-				{
-					goto PongLogic_thread_release_rsc;
-				}
-				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
-				{
-					logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
-					++logic->scoring.rightScore;
-					logic->scoring.absBall.x = PONG_MINW - (PONG_WALL_X + PONG_BALL_X);
-					goto PongLogic_thread_release_rsc;
-				}
-			}
 
 		PongLogic_thread_release_rsc: ;
 			// Release resources
@@ -265,6 +313,9 @@ bool PongLogic_create(PongLogic_t * restrict logic, PongWnd_t * pong)
 
 	*logic = (PongLogic_t){ 0 };
 	logic->pong = pong;
+
+	// Init rng
+	logic->rng = PongRng_init((uint64_t)time(NULL));
 
 	PongLogic_reset(logic);
 
@@ -463,7 +514,9 @@ void PongLogic_reset(PongLogic_t * logic)
 
 	// Reset scoring
 	logic->scoring = (Scoring_t){ 0 };
-	logic->scoring.ballAngle = (float)M_PI / 4.0f; // 45 degrees
+	// Semi random initial ball angle
+	logic->scoring.ballAngle = (float)M_PI / 4.0f + ((float)M_PI / 6.0f) * (PongRng_rand_normf(&logic->rng, 10000ULL) * 2.0f - 1.0f); // 45 degrees give or take
+	logic->scoring.ballSpeed = PONG_BALL_VELOCITY + (PONG_BALL_VELOCITY / 2.0f) * (PongRng_rand_normf(&logic->rng, 10000) * 2.0f - 1.0f);
 
 	PongLogic_calcAbsLeftPad(logic);
 	PongLogic_calcAbsRightPad(logic);

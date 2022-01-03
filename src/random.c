@@ -77,3 +77,13 @@ uint64_t PongRng_rand(void * rng)
 
 	return y;
 }
+
+double PongRng_rand_norm(void * rng, uint64_t resolution)
+{
+	return (double)(PongRng_rand(rng) % resolution) / (double)(resolution - 1ULL);
+}
+float PongRng_rand_normf(void * rng, uint64_t resolution)
+{
+	return (float)(PongRng_rand(rng) % resolution) / (float)(resolution - 1ULL);
+}
+

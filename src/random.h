@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#define PONGRNG_MAX UINT64_MAX
+
 #define PONGRNG_STATEVEC_LEN 624
 
 typedef struct PongRng
@@ -29,5 +31,23 @@ PongRng_t PongRng_init(uint64_t seed);
  */
 uint64_t PongRng_rand(void * rng);
 
+/**
+ * @brief Generate normalised random number from rng with specific
+ * resolution steps
+ * 
+ * @param rng Pointer to PongRng_t object
+ * @param resolution Resolution steps of generated number
+ * @return double Generated double
+ */
+double PongRng_rand_norm(void * rng, uint64_t resolution);
+/**
+ * @brief Generate normalised random number from rng with specific
+ * resolution steps
+ * 
+ * @param rng Pointer to PongRng_t object
+ * @param resolution Resolution steps of generated number
+ * @return float Generated float
+ */
+float PongRng_rand_normf(void * rng, uint64_t resolution);
 
 #endif
