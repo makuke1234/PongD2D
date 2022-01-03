@@ -700,16 +700,7 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 			DWRITE_MEASURING_MODE_NATURAL
 		);
 
-		uint32_t lScore = pong->logic.scoring.leftScore;
-		uint32_t rScore = pong->logic.scoring.rightScore;
-		uint32_t maxScore = (pong->logic.scoring.winnerIdx == 1) ? rScore : lScore;
-
-		wsprintfW(
-			temp,
-			L"%s wins with a score: %u",
-			(pong->logic.scoring.winnerIdx == 1) ? L"Right" : L"Left",
-			maxScore
-		);
+		wsprintfW(temp, L"%s wins!", (pong->logic.scoring.winnerIdx == 1) ? L"Right" : L"Left");
 		dxRTDrawTextW(
 			(ID2D1RenderTarget *)pong->dx.pRT,
 			temp,

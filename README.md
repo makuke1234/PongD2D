@@ -1,6 +1,6 @@
 # PongD2D
 
-![Release version](https://img.shields.io/badge/release-v1.2.0-green.svg)
+![Release version](https://img.shields.io/badge/release-v1.3.0-green.svg)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
@@ -25,6 +25,10 @@ Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/
 
 
 # Changelog
+
+* 1.3.0
+	* Make scoring more engaging, points are given for whole game instead of the number
+	of bounces, game ends at 10 points
 
 * 1.2.0
 	* Made ball movement more random/realistic

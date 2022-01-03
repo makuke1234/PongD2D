@@ -199,7 +199,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 			{
 				logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
-				++logic->scoring.leftScore;
 				float percentAngle = logic->scoring.absBall.x;
 				logic->scoring.absBall.x = PONG_WALL_X + PONG_BALL_X;
 				percentAngle = clamp(fabsf(logic->scoring.absBall.x - percentAngle) / PONG_BALL_X, 0.0f, 0.75f);
@@ -227,7 +226,6 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 			{
 				logic->scoring.ballAngle = fmodf((float)M_PI - logic->scoring.ballAngle, 2.0f * (float)M_PI);	// 180 - angle
-				++logic->scoring.rightScore;
 				float percentAngle = logic->scoring.absBall.x;
 				logic->scoring.absBall.x = PONG_MINW - (PONG_WALL_X + PONG_BALL_X);
 				percentAngle = clamp(fabsf(logic->scoring.absBall.x - percentAngle) / PONG_BALL_X, 0.0f, 0.75f);
@@ -258,7 +256,7 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 			}
 			else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 			{
-				logic->scoring.winnerIdx = 1;
+				++logic->scoring.rightScore;
 				collides = true;
 			}
 
@@ -276,13 +274,26 @@ DWORD WINAPI PongLogic_thread(LPVOID param)
 				}
 				else if (geoRel > D2D1_GEOMETRY_RELATION_DISJOINT)
 				{
+					++logic->scoring.leftScore;
 					collides = true;
 				}
 			}
 
 			if (collides)
 			{
-				logic->scoring.mode = GameMode_gameOver;
+				if (logic->scoring.leftScore >= 10 || logic->scoring.rightScore >= 10)
+				{
+					if (logic->scoring.rightScore > logic->scoring.leftScore)
+					{
+						logic->scoring.winnerIdx = 1;
+					}
+					logic->scoring.mode = GameMode_gameOver;
+				}
+				else
+				{
+					PongLogic_calcAbsBall(logic);
+					logic->scoring.notPaused = false;
+				}
 			}
 
 		PongLogic_thread_release_rsc: ;
