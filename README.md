@@ -1,6 +1,6 @@
 # PongD2D
 
-![Release version](https://img.shields.io/badge/release-v1.1.1-green.svg)
+![Release version](https://img.shields.io/badge/release-v1.2.0-red.svg)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
@@ -25,6 +25,11 @@ Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/
 
 
 # Changelog
+
+* 1.2.0
+	* Made ball movement more random/realistic
+	* Added random number generator, mt19937-like engine
+	*Wiki: [Mersenne Twister](https://en.wikipedia.org/wiki/Mersenne_Twister)*
 
 * 1.1.1
 	* Paddle movement speed is no longer affected by the frame rate
