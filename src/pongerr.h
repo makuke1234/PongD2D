@@ -18,6 +18,7 @@ typedef enum PongErr
 	PongErr_dwFactory,
 	PongErr_dwFont,
 	PongErr_dwFontAlignment,
+	PongErr_fullscreen,
 
 	PongErr_num_errs
 } PongErr_e;

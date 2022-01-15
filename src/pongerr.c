@@ -12,7 +12,8 @@ const wchar_t * c_errorIds[PongErr_num_errs] = {
 	L"Error creating D2D geometry!",
 	L"Error creating DWrite factory!",
 	L"Error creating DWrite font!",
-	L"Error settings DWrite font alignment!"
+	L"Error settings DWrite font alignment!",
+	L"Error going to fullscreen!",
 };
 
 PongErr_e g_pongLastError = PongErr_unknown;

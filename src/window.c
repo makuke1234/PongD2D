@@ -478,8 +478,15 @@ void PongWnd_toggleFullScreen(PongWnd_t * restrict pong)
 
 		// Get screen size
 		SIZE screen;
-		w32_getScreenSize(pong->hwnd, &screen);
-		MoveWindow(pong->hwnd, 0, 0, screen.cx, screen.cy, TRUE);
+		if (w32_getScreenSize(pong->hwnd, &screen))
+		{
+			MoveWindow(pong->hwnd, 0, 0, screen.cx, screen.cy, TRUE);
+		}
+		else
+		{
+			g_pongLastError = PongErr_fullscreen;
+			pongLastErr(pong);
+		}
 	}
 	else
 	{

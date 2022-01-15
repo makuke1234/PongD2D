@@ -21,8 +21,8 @@
 
 #define PONG_WALL_MAX ((PONG_MINH - PONG_WALL_Y) / 2.0f)
 
-#define VERSION_STR "1.3.1"
-#define VERSION_SEQ 1,3,1
+#define VERSION_STR "1.3.2"
+#define VERSION_SEQ 1,3,2
 
 
 #endif

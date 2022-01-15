@@ -1,6 +1,6 @@
 # PongD2D
 
-![Release version](https://img.shields.io/badge/release-v1.3.1-green.svg)
+![Release version](https://img.shields.io/badge/release-v1.3.2-green.svg)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
@@ -22,9 +22,13 @@ Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/
 | Down   | Move right wall down |
 | Escape | Pause/unpause        |
 | Enter  | Restart game         |
+| F11    | Toggle fullscreen    |
 
 
 # Changelog
+
+* 1.3.2
+	* Fix UB when going to fullscreen
 
 * 1.3.1
 	* Add window resizing support
