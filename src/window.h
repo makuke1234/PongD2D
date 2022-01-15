@@ -45,10 +45,16 @@ typedef struct PongWnd
 	SIZE minSize, border;
 	SIZE size;
 
+	bool isFullscreen;
+	DWORD oldStyle;
+	SIZE oldSize, oldPos;
 	HWND hwnd;
 	LPWSTR wndTitle;
 
 	FLOAT dpiX, dpiY;
+
+	FLOAT factor, offsetX, offsetY;
+
 	DxBoilerPlate_t dx;
 
 	PongLogic_t logic;
@@ -140,6 +146,20 @@ FLOAT PongWnd_dpiy(const PongWnd_t * restrict pong, FLOAT y);
 void PongWnd_calcDpiSpecific(PongWnd_t * restrict pong);
 
 /**
+ * @brief Calculates all size-correlated factors
+ * 
+ * @param pong Pointer to PongWnd_t object
+ */
+void PongWnd_calcPositions(PongWnd_t * restrict pong);
+
+/**
+ * @brief Toggle fullscreen
+ * 
+ * @param pong Pointer to PongWnd_t object
+ */
+void PongWnd_toggleFullScreen(PongWnd_t * restrict pong);
+
+/**
  * @brief Win32 window procedure "hub" that deals with all incoming messages
  * for all windows of one windows class
  */
@@ -158,7 +178,7 @@ void PongWnd_onRender(PongWnd_t * restrict pong);
 /**
  * @brief Size sub-method, WM_SIZE msg
  */
-void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp);
+void PongWnd_onSize(PongWnd_t * restrict pong);
 /**
  * @brief Active-resizing sub-method, WM_SIZING msg
  */

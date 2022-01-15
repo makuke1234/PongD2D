@@ -84,6 +84,21 @@ D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FIdentity()
 	return D2D1::Matrix3x2F::Identity();
 }
 
+D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FScale(D2D1_SIZE_F size, D2D1_POINT_2F center)
+{
+	return D2D1::Matrix3x2F::Scale(size, center);
+}
+
+D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FTranslation(D2D1_SIZE_F size)
+{
+	return D2D1::Matrix3x2F::Translation(size);
+}
+
+D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FMultiply(D2D1_MATRIX_3X2_F m1, D2D1_MATRIX_3X2_F m2)
+{
+	return m1 * m2;
+}
+
 
 void dxFactoryGetDesktopDpi(ID2D1Factory * This, FLOAT * dpiX, FLOAT * dpiY)
 {

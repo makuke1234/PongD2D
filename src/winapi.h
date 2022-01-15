@@ -55,5 +55,14 @@ bool w32_regClass(
  */
 LARGE_INTEGER w32_getTime();
 
+/**
+ * @brief Get current monitor screen size in pixels, by window
+ * 
+ * @param window Window handle
+ * @param pscreen Address to SIZE structure
+ * @return true On success
+ * @return false On failure
+ */
+bool w32_getScreenSize(HWND window, SIZE * pscreen);
 
 #endif

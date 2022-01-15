@@ -32,3 +32,18 @@ LARGE_INTEGER w32_getTime()
 		return time;
 	}
 }
+
+bool w32_getScreenSize(HWND window, SIZE * pscreen)
+{
+	HMONITOR monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO miw = { .cbSize = sizeof miw };
+	if (GetMonitorInfoW(monitor, &miw) == FALSE)
+	{
+		return false;
+	}
+
+	pscreen->cx = miw.rcMonitor.right  - miw.rcMonitor.left;
+	pscreen->cy = miw.rcMonitor.bottom - miw.rcMonitor.top;
+
+	return true;
+}

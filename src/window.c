@@ -294,7 +294,7 @@ bool PongWnd_create(PongWnd_t * restrict pong, HINSTANCE hInst, PWSTR lpCmdArgs,
 		0,
 		PONG_CLASSNAME,
 		PONG_APPNAME,
-		WS_OVERLAPPEDWINDOW ^ (WS_MAXIMIZEBOX | WS_SIZEBOX),
+		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -441,6 +441,72 @@ void PongWnd_calcDpiSpecific(PongWnd_t * restrict pong)
 	pong->minSize.cy = (LONG)PongWnd_dipy(pong, PONG_MINH) + pong->border.cy + 1;
 }
 
+void PongWnd_calcPositions(PongWnd_t * restrict pong)
+{
+	FLOAT x = PongWnd_dipx(pong, PONG_MINW), y = PongWnd_dipy(pong, PONG_MINH);
+
+	float factX = (float)pong->size.cx / x;
+	float factY = (float)pong->size.cy / y;
+
+	pong->factor = factX < factY ? factX : factY;
+	pong->offsetX = PongWnd_dpix(pong, ((float)pong->size.cx - x * pong->factor) / 2.0f);
+	pong->offsetY = PongWnd_dpiy(pong, ((float)pong->size.cy - y * pong->factor) / 2.0f);
+}
+
+void PongWnd_toggleFullScreen(PongWnd_t * restrict pong)
+{
+	// Toggle fullscreen flag
+	pong->isFullscreen ^= 1;
+
+	if (pong->isFullscreen)
+	{
+		pong->oldSize = (SIZE){
+			.cx = pong->size.cx,
+			.cy = pong->size.cy
+		};
+		RECT r;
+		GetWindowRect(pong->hwnd, &r);
+		pong->oldPos = (SIZE){
+			.cx = r.left,
+			.cy = r.top
+		};
+		pong->oldStyle = (DWORD)SetWindowLongPtrW(
+			pong->hwnd,
+			GWL_STYLE,
+			WS_SYSMENU | WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE
+		);
+
+		// Get screen size
+		SIZE screen;
+		w32_getScreenSize(pong->hwnd, &screen);
+		MoveWindow(pong->hwnd, 0, 0, screen.cx, screen.cy, TRUE);
+	}
+	else
+	{
+		RECT r = {
+			.left   = 0,
+			.top    = 0,
+			.right  = pong->oldSize.cx,
+			.bottom = pong->oldSize.cy
+		};
+		SetWindowLongPtrW(
+			pong->hwnd,
+			GWL_STYLE,
+			pong->oldStyle
+		);
+		AdjustWindowRect(&r, pong->oldStyle, FALSE);
+		MoveWindow(
+			pong->hwnd,
+			pong->oldPos.cx,
+			pong->oldPos.cy,
+			r.right  - r.left,
+			r.bottom - r.top,
+			TRUE
+		);
+		PongWnd_calcDpiSpecific(pong);
+	}
+}
+
 LRESULT CALLBACK PongWnd_winProcHub(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	PongWnd_t * self = NULL;
@@ -491,7 +557,7 @@ LRESULT PongWnd_winProc(PongWnd_t * pong, HWND hwnd, UINT msg, WPARAM wp, LPARAM
 		PongWnd_onSizing(pong, wp, lp);
 		break;
 	case WM_SIZE:
-		PongWnd_onSize(pong, lp);
+		PongWnd_onSize(pong);
 		break;
 	case WM_DPICHANGED:
 		PongWnd_onDpiChanged(pong, lp);
@@ -521,10 +587,30 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 	}
 
 	dxRTBeginDraw((ID2D1RenderTarget *)pong->dx.pRT);
-	dxRTSetTransform((ID2D1RenderTarget *)pong->dx.pRT, dxD2D1Matrix3x2FIdentity());
+	
+	D2D1_MATRIX_3X2_F scale = dxD2D1Matrix3x2FScale(
+		(D2D1_SIZE_F){
+			.width  = pong->factor,
+			.height = pong->factor
+		},
+		(D2D1_POINT_2F){
+			.x = 0.0f,
+			.y = 0.0f
+		}
+	);
+	D2D1_MATRIX_3X2_F translate = dxD2D1Matrix3x2FTranslation(
+		(D2D1_SIZE_F){
+			.width  = pong->offsetX,
+			.height = pong->offsetY
+		}
+	);
+
+	dxRTSetTransform(
+		(ID2D1RenderTarget *)pong->dx.pRT,
+		dxD2D1Matrix3x2FMultiply(scale, translate)
+	);
 	// Draw black background
 	dxRTClear((ID2D1RenderTarget *)pong->dx.pRT, (D2D1_COLOR_F){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f });
-
 
 	// Draw line in the center
 	dxRTDrawLine(
@@ -742,20 +828,24 @@ void PongWnd_onRender(PongWnd_t * restrict pong)
 		PongWnd_freeAssets(pong);
 	}
 }
-void PongWnd_onSize(PongWnd_t * restrict pong, LPARAM lp)
+void PongWnd_onSize(PongWnd_t * restrict pong)
 {
 	if (pong->dx.pRT == NULL)
 	{
 		return;
 	}
-	pong->size.cx = LOWORD(lp);
-	pong->size.cy = HIWORD(lp);
+	RECT r;
+	GetClientRect(pong->hwnd, &r);
+	pong->size.cx = r.right  - r.left;
+	pong->size.cy = r.bottom - r.top;
 
-	dxHwndRTResize(pong->dx.pRT, (D2D1_SIZE_U){ .width = (UINT32)pong->size.cx, .height = (UINT32)pong->size.cy });
-	
-	// Recreate assets
-	PongWnd_freeAssets(pong);
-	PongWnd_createAssets(pong);
+	dxHwndRTResize(
+		pong->dx.pRT, (D2D1_SIZE_U){
+			.width  = (UINT32)pong->size.cx,
+			.height = (UINT32)pong->size.cy
+		}
+	);
+	PongWnd_calcPositions(pong);
 }
 void PongWnd_onSizing(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 {
@@ -840,6 +930,13 @@ void PongWnd_onKeyPress(PongWnd_t * restrict pong, WPARAM wp, LPARAM lp)
 		if (pong->logic.scoring.mode != GameMode_normal || !pong->logic.scoring.notPaused)
 		{
 			PongLogic_reset(&pong->logic);
+		}
+		break;
+	case VK_F11:
+		// Act only if key was just pressed down, prevents spamming
+		if ((lp & 0x40000000) == 0)
+		{
+			PongWnd_toggleFullScreen(pong);
 		}
 		break;
 	}

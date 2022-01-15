@@ -122,6 +122,33 @@ D2D1_PIXEL_FORMAT dxD2D1PixelFormat(
 D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FIdentity();
 
 /**
+ * @brief Creates a scale transformation that has the specified scale factors
+ * and center point.
+ * 
+ * @param size The x-axis and y-axis scale factors of the scale transformation
+ * @param center The point about which the scale is performed
+ * @return D2D1_MATIRX_3X2_F The new scale transformation
+ */
+D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FScale(D2D1_SIZE_F size, D2D1_POINT_2F center);
+
+/**
+ * @brief Creates a translation transformation that has the specified x and y displacements
+ * 
+ * @param size The distance to translate from the x-axis and the y-axis
+ * @return D2D1_MATRIX_3X2_F The new translation transformation
+ */
+D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FTranslation(D2D1_SIZE_F size);
+
+/**
+ * @brief Multiplies 2 transformation matrixes
+ * 
+ * @param m1 First operand
+ * @param m2 Second operand
+ * @return D2D1_MATRIX_3X2_F Transformation multiplication result
+ */
+D2D1_MATRIX_3X2_F dxD2D1Matrix3x2FMultiply(D2D1_MATRIX_3X2_F m1, D2D1_MATRIX_3X2_F m2);
+
+/**
  * @brief Get desktop DPI settings from D2D factory
  * 
  * @param This Pointer to D2D factory object
