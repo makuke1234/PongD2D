@@ -1,6 +1,7 @@
 # PongD2D
 
-![Release version](https://img.shields.io/badge/release-v1.3.2-green.svg)
+[![Release version](https://img.shields.io/github/v/release/makuke1234/PongD2D?display_name=release&include_prereleases)](https://github.com/makuke1234/PongD2D/releases/latest)
+[![Total downloads](https://img.shields.io/github/downloads/makuke1234/PongD2D/total)](https://github.com/makuke1234/PongD2D/releases)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 
