@@ -4,6 +4,7 @@
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/PongD2D/total)](https://github.com/makuke1234/PongD2D/releases)
 ![C version](https://img.shields.io/badge/version-C20-blue.svg)
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
+[![wakatime](https://wakatime.com/badge/github/makuke1234/PongD2D.svg)](https://wakatime.com/badge/github/makuke1234/PongD2D)
 
 A pong fork written in C utilising Direct2D API (similar to my other project [SnakeD2D](https://github.com/makuke1234/SnakeD2D). Wrappers for Direct2D are written in C++.
 
