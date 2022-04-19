@@ -6,7 +6,7 @@
 ![C++ version](https://img.shields.io/badge/version-C++20-blue.svg)
 [![wakatime](https://wakatime.com/badge/github/makuke1234/PongD2D.svg)](https://wakatime.com/badge/github/makuke1234/PongD2D)
 
-A pong fork written in C utilising Direct2D API (similar to my other project [SnakeD2D](https://github.com/makuke1234/SnakeD2D). Wrappers for Direct2D are written in C++. The application binary has been built on the MSYS2 platform which includes the MinGW port of the GNU C Compiler (GCC).
+A pong fork written in C utilising Direct2D API (similar to my other project [SnakeD2D](https://github.com/makuke1234/SnakeD2D). Wrappers for Direct2D are written in C++. The application binary has been built on the MSYS2 platform which includes the MinGW port of the GNU C Compiler (GCC) & the GNU C++ Compiler (G++).
 
 
 # Obtaining
