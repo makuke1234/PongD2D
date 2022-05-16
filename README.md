@@ -29,6 +29,9 @@ Windows binaries can be downloaded [here](https://github.com/makuke1234/PongD2D/
 
 # Changelog
 
+* 1.3.3
+	* Shut down logic thread before freeing the dxFactory
+
 * 1.3.2
 	* Fix UB when going to fullscreen
 
