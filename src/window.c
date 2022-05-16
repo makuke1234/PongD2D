@@ -399,6 +399,8 @@ int PongWnd_msgLoop(PongWnd_t * pong)
 }
 void PongWnd_free(PongWnd_t * restrict pong)
 {
+	PongLogic_free(&pong->logic);
+	
 	if (pong->wndTitle != NULL)
 	{
 		free(pong->wndTitle);
@@ -407,8 +409,6 @@ void PongWnd_free(PongWnd_t * restrict pong)
 	PongWnd_freeAssets(pong);
 	dxSafeRelease(&pong->dx.wFactory);
 	dxSafeRelease((IUnknown **)&pong->dx.factory);
-
-	PongLogic_free(&pong->logic);
 }
 
 FLOAT PongWnd_dipx(const PongWnd_t * restrict pong, FLOAT x)
